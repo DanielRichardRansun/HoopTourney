@@ -12,7 +12,7 @@
         @php
             $roundCount = count($bracket) + 1;
             $roundLabels = [];
-            $stages = ['Champion', 'Final', 'Semi Final', 'Quarter Final', 'Penyisihan'];
+            $stages = ['Final', 'Semi Final', 'Quarter Final', 'Penyisihan'];
 
             for ($i = 0; $i < $roundCount; $i++) {
                 $roundLabels[$roundCount - $i - 1] = $stages[$i] ?? 'Penyisihan';
@@ -28,21 +28,27 @@
                         <div class="round-title">{{ $roundLabels[$index] ?? 'Round ' . ($index + 1) }}</div>
                         <div class="matchups">
                             @foreach ($round as $matchup)
-                                @if ($matchup[0] !== '-' && $matchup[1] !== '-')
-                                    <div class="matchup">
-                                        <div><strong>Game {{ $gameCounter }}</strong></div>
-                                        <div class="team">{{ $matchup[0] }}</div>
-                                        <div class="team">{{ $matchup[1] }}</div>
-                                    </div>
-                                    @php $gameCounter++; @endphp
-                                @endif
+                            @if ($matchup[0]['name'] !== '-' && $matchup[1]['name'] !== '-')
+                            <div class="matchup" 
+                                 onclick="window.location='{{ route('matchResults.show', ['id_tournament' => $tournament->id, 'id_schedule' => $matchup[2]]) }}'" 
+                                 style="cursor: pointer;">
+                                <div><strong>Game {{ $gameCounter }}</strong></div>
+                                <div class="team {{ $matchup[0]['is_winner'] ? 'winner' : '' }} {{ $matchup[0]['name'] === 'TBD' ? 'tbd' : '' }}">
+                                    {{ $matchup[0]['name'] }}
+                                </div>
+                                <div class="team {{ $matchup[1]['is_winner'] ? 'winner' : '' }} {{ $matchup[1]['name'] === 'TBD' ? 'tbd' : '' }}">
+                                    {{ $matchup[1]['name'] }}
+                                </div>                                
+                            </div>
+                            @php $gameCounter++; @endphp
+                        @endif                        
                             @endforeach
                         </div>
                     </div>
                 @endforeach
 
                 <div class="round">
-                    <div class="round-title">{{ $roundLabels[$roundCount - 1] ?? 'Champion' }}</div>
+                    <div class="round-title">{{ $roundLabels[$roundCount] ?? 'Champion' }}</div>
                     <div class="matchups">
                         <div class="matchup champion">
                             <div>Winner Final</div>
@@ -102,9 +108,17 @@
     .matchup {
         background-color: #f0f0f0;
         padding: 10px;
-        margin-bottom: 10px;
+        margin-bottom: 15px;
         border-radius: 8px;
         text-align: center;
+        outline: 2px solid #999;
+        cursor: pointer;
+    }
+
+    .matchup:hover {
+    /* background-color: #ffffff; */
+    transform: scale(1.02); 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
     }
 
     .team {
@@ -120,5 +134,16 @@
         background-color: gold;
         font-weight: bold;
     }
+    .team.winner {
+    background-color: #95e197;
+    color: rgb(0, 0, 0);
+    font-weight: bold;
+    padding: 5px;
+}
+.team.tbd {
+    background-color: #d3d3d3;
+    color: #000000;
+    font-style: italic;
+}
 </style>
 @endsection

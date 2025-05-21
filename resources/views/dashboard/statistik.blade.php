@@ -79,7 +79,7 @@
             <table id="statsTable" class="table table-bordered table-hover">
                 <thead>
                     <tr>
-                        <th>Nama Pemain</th>
+                        <th>Nama</th>
                         <th class="highlight-per">PER</th>
                         <th>Point</th>
                         <th>FGM</th>
@@ -137,7 +137,8 @@
             "paging": true,
             "ordering": true,
             "info": true,
-            "searching": true
+            "searching": true,
+            "order": [[1, 'desc']],
         });
     });
 </script>

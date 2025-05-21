@@ -189,11 +189,67 @@ input, select {
 .status-completed {
     background-color: #198754;
 }
+.alert {
+    position: relative;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1rem;
+    border: 1px solid transparent;
+    border-radius: 0.25rem;
+    display: block !important; /* Pastikan selalu ditampilkan */
+    opacity: 1 !important; /* Pastikan tidak transparan */
+}
+
+.alert-success {
+    color: #155724;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+}
+
+.alert-danger {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
+
+
+.schedule-card {
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid #ddd;
+    padding: 1rem;
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.schedule-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    background-color: #f9f9f9;
+}
 
 
 </style>
 <div class="container mt-5">
     <h2 class="text-center" style="font-weight: bold;">Jadwal Lomba {{ $tournament->name }}</h2>
+
+    @if(session('success'))
+    <div class="alert alert-success alert-dismissible fade show" style="display: block !important;">
+            {{ session('success') }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show">
+            {{ session('error') }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    @endif
 
     <div class="text-center mb-4">
         <label for="filterStatus"><strong>Filter Status:</strong></label>
@@ -205,8 +261,6 @@ input, select {
             <option value="Completed">Completed</option>
         </select>
     </div>
-
-    
     @if($schedules->isEmpty())
         <div class="alert alert-warning text-center">No Schedule available in this tournament.</div>
     @else
@@ -233,8 +287,7 @@ input, select {
             }
         }
     @endphp
-
-            <div class="schedule-card" data-status="{{ strtolower($schedule->status) }}">
+            <div class="schedule-card" data-status="{{ strtolower($schedule->status) }}" onclick="window.location='{{ route('matchResults.show', ['id_tournament' => $tournament->id, 'id_schedule' => $schedule->id]) }}'">
                 <div class="schedule-title">GAME {{ $index + 1 }}</div>
                 <div class="team-container">
                     <div class="team">{{ $schedule->team1 ? $schedule->team1->name : 'TBD' }}</div>
@@ -261,27 +314,26 @@ input, select {
                     <p>Lokasi: {{ $schedule->location }}</p>
                 
                     @if ($isAdmin)
-    <div class="button-group">
-        <a href="javascript:void(0);" class="btn btn-warning btn-custom" onclick="openModal({{ $schedule->id }})">
-            <i class="fas fa-edit"></i> Edit Detail Jadwal
-        </a>
-        
-        @if ($schedule->matchResult)
-            <!-- Jika match_result sudah ada, tampilkan tombol Edit -->
-            <a href="{{ route('matchResults.edit', ['id_tournament' => $tournament->id, 'id_schedule' => $schedule->id]) }}" 
-               class="btn btn-primary btn-custom">
-                <i class="fas fa-edit"></i> Edit Hasil Pertandingan
-            </a>
-        @else
-            <!-- Jika match_result belum ada, tampilkan tombol Insert -->
-            <a href="{{ route('matchResults.create', ['id_tournament' => $tournament->id, 'id_schedule' => $schedule->id]) }}" 
-               class="btn btn-custom" style="background-color: #198754; border-color: #198754; color: white;">
-                <i class="fas fa-file-alt"></i> Insert Hasil Pertandingan
-            </a>                    
-        @endif                    
-    </div>
-@endif
-
+                        <div class="button-group">
+                            <a href="javascript:void(0);" class="btn btn-warning btn-custom" onclick="event.stopPropagation(); openModal({{ $schedule->id }})">
+                                <i class="fas fa-edit"></i> Edit Detail Jadwal
+                            </a>
+                            
+                            @if ($schedule->matchResult)
+                                <!-- Jika match_result sudah ada, tampilkan tombol Edit -->
+                                <a href="{{ route('matchResults.edit', ['id_tournament' => $tournament->id, 'id_schedule' => $schedule->id]) }}" 
+                                    class="btn btn-primary btn-custom" onclick="event.stopPropagation();">
+                                     <i class="fas fa-edit"></i> Edit Hasil Pertandingan
+                                 </a>
+                            @else
+                                <!-- Jika match_result belum ada, tampilkan tombol Insert -->
+                                <a href="{{ route('matchResults.create', ['id_tournament' => $tournament->id, 'id_schedule' => $schedule->id]) }}" 
+                                    class="btn btn-custom" style="background-color: #198754; border-color: #198754; color: white;" onclick="event.stopPropagation();">
+                                     <i class="fas fa-file-alt"></i> Insert Hasil Pertandingan
+                                 </a>                  
+                            @endif                    
+                        </div>
+                    @endif
                 </div>             
             </div>
 

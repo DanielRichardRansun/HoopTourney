@@ -48,7 +48,6 @@
         <h2>Klasemen / Statistik Tim {{ $tournament->name }}</h2>
     </div>
 
-   <!-- Tabel Klasemen -->
 <!-- Tabel Klasemen -->
 <div class="table-container mt-4">
     <div class="table-responsive">
@@ -79,7 +78,6 @@
                 @endforeach
             </tbody>
         </table>
-        
     </div>
 </div>
 

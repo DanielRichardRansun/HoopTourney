@@ -14,7 +14,7 @@ class BracketController extends Controller
     {
         $tournament = Tournament::findOrFail($id);
         $schedules = Schedule::where('tournaments_id', $id)
-            ->with('matchResult') // Eager load matchResult untuk efisiensi query
+            ->with('matchResult')
             ->orderBy('round')
             ->get();
 
@@ -23,19 +23,29 @@ class BracketController extends Controller
         }
 
         $bracket = [];
-        $champion = 'TBD'; // Default value jika belum ada pemenang
+        $champion = 'TBD';
 
         foreach ($schedules as $schedule) {
             $round = $schedule->round;
-            $team1 = Team::find($schedule->team1_id)->name ?? 'TBD';
-            $team2 = Team::find($schedule->team2_id)->name ?? 'TBD';
 
-            // Cek apakah ini round terakhir dan ada hasil pertandingan
-            if ($schedule->round == $schedules->max('round') && $schedule->matchResult) {
-                $champion = Team::find($schedule->matchResult->winning_team_id)->name ?? 'TBD';
+            $team1Model = Team::find($schedule->team1_id);
+            $team2Model = Team::find($schedule->team2_id);
+
+            $team1Name = $team1Model->name ?? 'TBD';
+            $team2Name = $team2Model->name ?? 'TBD';
+
+            $winnerId = $schedule->matchResult->winning_team_id ?? null;
+
+            $bracket[$round][] = [
+                ['name' => $team1Name, 'is_winner' => $schedule->matchResult?->winning_team_id == $schedule->team1_id],
+                ['name' => $team2Name, 'is_winner' => $schedule->matchResult?->winning_team_id == $schedule->team2_id],
+                $schedule->id
+            ];
+
+
+            if ($schedule->round == $schedules->max('round') && $winnerId) {
+                $champion = Team::find($winnerId)->name ?? 'TBD';
             }
-
-            $bracket[$round][] = [$team1, $team2];
         }
 
         return view('dashboard.bracket', compact('tournament', 'bracket', 'champion'));

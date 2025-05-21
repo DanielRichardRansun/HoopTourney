@@ -17,13 +17,37 @@
 
     <!-- Scripts -->
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
+
+    <style>
+        body {
+            background-image: url("{{ asset('images/website_background3.jpg') }}");
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            min-height: 100vh;
+        }
+        </style>
 </head>
 <body>
     <div id="app">
         <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
             <div class="container">
-                <a class="navbar-brand" href="{{ url('/') }}">
-                    {{ config('app.name', 'HoopTourney') }}
+                <a class="navbar-brand" href="{{ url('/') }}" style="display: flex; align-items: center;">
+                    <div style="
+                        background-image: url('{{ asset('images/logo.png') }}');
+                        background-size: contain;
+                        background-repeat: no-repeat;
+                        width: 40px;
+                        height: 40px;
+                        margin-right: 10px;
+                    "></div>
+                    <span style="
+                    font-family: 'Helvetica Neue', Arial, sans-serif;
+                    font-size: 1.32rem;
+                    font-weight: 550;
+                    color: #2a477a;
+                ">HoopTourney</span>
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
                     <span class="navbar-toggler-icon"></span>
@@ -32,7 +56,6 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <!-- Left Side Of Navbar -->
                     <ul class="navbar-nav me-auto"></ul>
-        
         
                     <!-- Right Side Of Navbar -->
                     <ul class="navbar-nav ms-auto">

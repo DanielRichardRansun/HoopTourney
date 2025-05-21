@@ -65,8 +65,24 @@ Route::get('/tournament/{tournament_id}/teams/{id}', [TeamController::class, 'sh
 Route::get('/tournament/{id}', [TournamentController::class, 'show'])->name('tournament.show');
 Route::get('/tournament/detail/{id}', [TournamentController::class, 'detail'])->name('tournament.detail');
 
+// Match Result Detail (untuk semua user kecuali role:1)
+Route::get('/dashboard/jadwal/{id_tournament}/matchresult/{id_schedule}', [MatchResultController::class, 'show'])->name('matchResults.show');
+
 // Route untuk halaman welcome yang menampilkan daftar turnamen
 Route::get('/', [TournamentController::class, 'index'])->name('welcome');
+
+//Sheet Import & Download
+Route::get(
+    '/tournaments/{id_tournament}/schedules/{id_schedule}/download-template',
+    [MatchResultController::class, 'downloadTemplate']
+)
+    ->name('matchResults.downloadTemplate');
+
+Route::post(
+    '/tournaments/{id_tournament}/schedules/{id_schedule}/import-sheet',
+    [MatchResultController::class, 'importFromSheet']
+)
+    ->name('matchResults.importFromSheet');
 
 Auth::routes();
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');

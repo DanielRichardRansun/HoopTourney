@@ -6,32 +6,44 @@ use Illuminate\Http\Request;
 use App\Models\Tournament;
 use App\Models\Team;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class TournamentController extends Controller
 {
     public function index(Request $request)
     {
-        // Membuat query dasar
+
+        $now = Carbon::now();
+
+        // Update status ke 'ongoing'
+        Tournament::whereDate('start_date', '<=', $now->toDateString())
+            ->whereDate('end_date', '>=', $now->toDateString())
+            ->where('status', '!=', 'ongoing')
+            ->update(['status' => 'ongoing']);
+
+        // Update status ke 'completed' jika hari ini adalah end_date + 1
+        Tournament::whereDate('end_date', '=', $now->copy()->subDay()->toDateString())
+            ->where('status', '!=', 'completed')
+            ->update(['status' => 'completed']);
+
+        // Query dan FILTER
         $query = Tournament::query();
 
-        // Filter berdasarkan nama turnamen
         if ($request->has('search') && $request->search != '') {
             $query->where('name', 'like', '%' . $request->search . '%');
         }
 
-        // Filter berdasarkan status turnamen
         if ($request->has('status') && $request->status != 'all') {
             $query->where('status', $request->status);
         }
 
-        // Urutkan berdasarkan status: upcoming -> ongoing -> completed
         $tournaments = $query
             ->orderByRaw("FIELD(status, 'upcoming','scheduled', 'ongoing', 'completed')")
             ->get();
 
-        // Mengirim data turnamen ke view welcome.blade.php
         return view('welcome', compact('tournaments'));
     }
+
 
 
     public function myTournaments()

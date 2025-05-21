@@ -45,7 +45,8 @@ class ScheduleController extends Controller
         $tournament = Tournament::findOrFail($id);
         $user = Auth::user();
 
-        $isAdmin = $user->role == 1 && $tournament->users_id == $user->id;
+        // Cek apakah user login atau tidak
+        $isAdmin = $user && $user->role == 1 && $tournament->users_id == $user->id;
 
         $tournamentTeams = Team::whereHas('teamTournament', function ($query) use ($id) {
             $query->where('tournament_id', $id);
@@ -79,22 +80,19 @@ class ScheduleController extends Controller
         return redirect()->back()->with('success', 'Jadwal berhasil diperbarui!');
     }
 
-
     public function generateSchedule($id)
     {
         $this->checkTournamentAdminAccess($id);
-
         $tournament = Tournament::findOrFail($id);
 
-        // Hapus jadwal lama jika ada
-        Schedule::where('tournaments_id', $id)->delete();
+        // Check if randomize teams is requested
+        $randomizeTeams = request()->has('randomize_teams') && request('randomize_teams') == '1';
 
-        // Ambil bracket yang telah dihasilkan
-        $bracket = $this->generateBracket($tournament);
+        Schedule::where('tournaments_id', $id)->delete();
+        $bracket = $this->generateBracket($tournament, $randomizeTeams);
 
         $matchIndex = 1;
         $round = 1;
-        // $date = Carbon::parse($tournament->start_date);
 
         foreach ($bracket as $roundMatches) {
             foreach ($roundMatches as $match) {
@@ -103,7 +101,6 @@ class ScheduleController extends Controller
                     continue;
                 }
 
-                // Buat jadwal pertandingan baru
                 Schedule::create([
                     'team1_id' => $match[0] !== '-' ? $this->getTeamIdByName($match[0]) : null,
                     'team2_id' => $match[1] !== '-' ? $this->getTeamIdByName($match[1]) : null,
@@ -119,15 +116,20 @@ class ScheduleController extends Controller
             $round++;
         }
 
-        return redirect()->route('tournament.detail', $id)->with('success', 'Jadwal berhasil dibuat!');
+        return redirect()->route('tournament.detail', $id)->with('success', 'Schedule & Bracket berhasil dibuat!');
     }
 
-    private function generateBracket($tournament)
+    private function generateBracket($tournament, $randomizeTeams = false)
     {
         $teams = $tournament->teams()->pluck('name')->toArray();
 
         if (count($teams) === 0) {
             return [];
+        }
+
+        // Randomize team order if requested
+        if ($randomizeTeams) {
+            shuffle($teams);
         }
 
         $totalTeams = count($teams);

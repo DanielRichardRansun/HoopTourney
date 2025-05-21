@@ -6,37 +6,35 @@ use App\Models\Player;
 use App\Models\Tournament;
 use App\Models\Team;
 use App\Models\PlayerStat;
+use App\Models\MatchResult;
 use Illuminate\Http\Request;
 
 class StatistikController extends Controller
 {
     public function show(Request $request, $tournamentId)
     {
-        // Ambil data turnamen berdasarkan ID
-        $tournament = Tournament::findOrFail($tournamentId);
-
-        // Ambil semua tim yang berpartisipasi dalam turnamen
+        $tournament = Tournament::find($tournamentId);
         $teams = $tournament->teams;
-
-        // Ambil parameter filter dari request
         $teamId = $request->input('team_id');
+        // Ambil semua match_result_id yang berkaitan dengan tournament ini
+        $matchResultIds = MatchResult::whereHas('schedule', function ($query) use ($tournamentId) {
+            $query->where('tournaments_id', $tournamentId);
+        })->pluck('id');
 
-        // Ambil pemain berdasarkan tournament_id dan filter tim jika ada
-        $playersQuery = Player::whereHas('team', function ($query) use ($tournamentId) {
-            $query->whereHas('tournaments', function ($subQuery) use ($tournamentId) {
-                $subQuery->where('tournaments.id', $tournamentId);
-            });
-        })->with('playerStats');
+        // Ambil semua team_id yang tergabung dalam turnamen
+        $teamIds = $tournament->teams->pluck('id');
+
+        // Ambil pemain dari tim-tim tersebut, dan ambil hanya player_stats yang match_result-nya termasuk dalam turnamen
+        $playersQuery = Player::whereIn('teams_id', $teamIds)
+            ->with(['playerStats' => function ($query) use ($matchResultIds) {
+                $query->whereIn('match_results_id', $matchResultIds);
+            }, 'team']);
 
         if ($teamId) {
-            $playersQuery->whereHas('team', function ($query) use ($teamId) {
-                $query->where('teams.id', $teamId);
-            });
+            $playersQuery->where('teams_id', $teamId);
         }
 
         $players = $playersQuery->get();
-
-        // Hitung statistik total atau rata-rata setiap player
         foreach ($players as $player) {
             $player->total_stats = $player->playerStats->reduce(function ($carry, $stat, $index) use ($player) {
                 $carry['point'] += $stat->point;
@@ -51,52 +49,23 @@ class StatistikController extends Controller
                 $carry['blk'] += $stat->blk;
                 $carry['pf'] += $stat->pf;
                 $carry['to'] += $stat->to;
-
-                // Hitung PER berdasarkan statistik
-                $carry['per'] += $stat->point +
-                    ($stat->fgm * 0.4) +
-                    ($stat->fga * -0.7) +
-                    (($stat->fta - $stat->ftm) * -0.4) +
-                    ($stat->orb * 0.7) +
-                    ($stat->drb * 0.3) +
-                    $stat->stl +
-                    ($stat->ast * 0.7) +
-                    ($stat->blk * 0.7) +
-                    ($stat->pf * -0.4) -
-                    $stat->to;
+                $carry['per'] += $stat->per;
 
                 if ($index === count($player->playerStats) - 1) {
-                    $carry['point'] /= count($player->playerStats);
-                    $carry['fgm'] /= count($player->playerStats);
-                    $carry['fga'] /= count($player->playerStats);
-                    $carry['fta'] /= count($player->playerStats);
-                    $carry['ftm'] /= count($player->playerStats);
-                    $carry['orb'] /= count($player->playerStats);
-                    $carry['drb'] /= count($player->playerStats);
-                    $carry['stl'] /= count($player->playerStats);
-                    $carry['ast'] /= count($player->playerStats);
-                    $carry['blk'] /= count($player->playerStats);
-                    $carry['pf'] /= count($player->playerStats);
-                    $carry['to'] /= count($player->playerStats);
-
-                    // Menghitung ulang PER menggunakan rata-rata
-                    $carry['per'] = (
-                        $carry['point'] +
-                        ($carry['fgm'] * 0.4) +
-                        ($carry['fga'] * -0.7) +
-                        (($carry['fta'] - $carry['ftm']) * -0.4) +
-                        ($carry['orb'] * 0.7) +
-                        ($carry['drb'] * 0.3) +
-                        $carry['stl'] +
-                        ($carry['ast'] * 0.7) +
-                        ($carry['blk'] * 0.7) +
-                        ($carry['pf'] * -0.4) -
-                        $carry['to']
-                    );
+                    $carry['point'] = round($carry['point'] / count($player->playerStats), 2);
+                    $carry['fgm'] = round($carry['fgm'] / count($player->playerStats), 2);
+                    $carry['fga'] = round($carry['fga'] / count($player->playerStats), 2);
+                    $carry['fta'] = round($carry['fta'] / count($player->playerStats), 2);
+                    $carry['ftm'] = round($carry['ftm'] / count($player->playerStats), 2);
+                    $carry['orb'] = round($carry['orb'] / count($player->playerStats), 2);
+                    $carry['drb'] = round($carry['drb'] / count($player->playerStats), 2);
+                    $carry['stl'] = round($carry['stl'] / count($player->playerStats), 2);
+                    $carry['ast'] = round($carry['ast'] / count($player->playerStats), 2);
+                    $carry['blk'] = round($carry['blk'] / count($player->playerStats), 2);
+                    $carry['pf'] = round($carry['pf'] / count($player->playerStats), 2);
+                    $carry['to'] = round($carry['to'] / count($player->playerStats), 2);
+                    $carry['per'] = round($carry['per'] / count($player->playerStats), 2); // Rata-rata PER
                 }
-
-                // **UPDATE ke database**
-                PlayerStat::where('players_id', $player->id)->update(['per' => $carry['per']]);
 
                 return $carry;
             }, [

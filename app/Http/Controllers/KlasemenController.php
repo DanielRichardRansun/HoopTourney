@@ -53,6 +53,8 @@ class KlasemenController extends Controller
                 : 0;
         }
 
+        $teams = $teams->sortBy('losses')->sortByDesc('wins')->values();
+
         return view('dashboard.klasemen', compact('tournament', 'teams'));
     }
 }

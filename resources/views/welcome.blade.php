@@ -5,11 +5,6 @@
         body {
             background-color: #f8f9fa;
         }
-        .header {
-            background: linear-gradient(90deg, #007bff, #6610f2);
-            color: white;
-            padding: 30px 0;
-        }
         .table th {
             background-color: #007bff;
             color: white;
@@ -20,7 +15,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         .header {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            background: linear-gradient(135deg, rgba(30, 60, 114, 0.95) 0%, rgba(42, 82, 152, 0.95) 100%);
             color: white;
             padding: 40px 0;
             border-radius: 8px;
@@ -131,6 +126,65 @@
         transform: scale(1.01);
         box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
+
+
+    /* Untuk membuat tabel transparan */
+    .table {
+        background-color: transparent !important;
+    }
+    
+    /* Header tabel TIDAK transparan */
+    .table thead tr {
+        background-color: #2a5298 !important;
+    }
+    
+    /* Untuk membuat sel-sel td transparan */
+    .table td {
+        background-color: transparent !important;
+        border-color: rgba(0, 0, 0, 0.1) !important; /* Garis lebih subtle */
+        color: #000 !important; /* Teks hitam */
+    }
+    
+    /* Header cells */
+    .table th {
+        background-color: #2a5298 !important; /* Warna default Bootstrap */
+        border-color: #2a5298 !important; /* Warna border default */
+        color: #ffffff !important; /* Teks gelap */
+    }
+    
+    /* Untuk hover effect */
+    .table-hover tbody tr:hover td {
+        background-color: rgba(0, 0, 0, 0.05) !important; /* Hover lebih subtle */
+    }
+    
+    /* Warna khusus untuk baris peringkat */
+    .gold-row td {
+        background-color: rgba(255, 215, 0, 0.1) !important;
+    }
+    .silver-row td {
+        background-color: rgba(192, 192, 192, 0.1) !important;
+    }
+    .bronze-row td {
+        background-color: rgba(205, 127, 50, 0.1) !important;
+    }
+    
+    /* Warna ikon trofi */
+    .gold-icon {
+        color: gold !important;
+    }
+    .silver-icon {
+        color: silver !important;
+    }
+    .bronze-icon {
+        color: #cd7f32 !important; /* Warna bronze */
+    }
+    
+    /* Gaya khusus header */
+    .table thead th {
+        border-bottom-width: 2px !important;
+        border-top: none !important;
+        font-weight: 600 !important; /* Tebalkan font header */
+    }
     </style>
 
     <div class="container">
@@ -143,6 +197,7 @@
             <div class="alert alert-primary text-center" role="alert">
                 <strong>Buat Akun dan Kelola Tournament Anda Sendiri!</strong>
                 <a href="{{ route('register') }}" class="btn btn-sm btn-light ml-2">Register</a>
+                <a href="{{ route('login') }}" class="btn btn-sm btn-light ml-2">Login</a>
             </div>
         @endguest
 
@@ -231,7 +286,6 @@
             </table>
         </div>
         
-        <!-- Tambahkan setelah tournament table -->
         <div class="text-center" style="margin-top: 40px; margin-bottom: 15px;">
             <h2>Top 10 Hoop Tourney Players</h2>
         </div>

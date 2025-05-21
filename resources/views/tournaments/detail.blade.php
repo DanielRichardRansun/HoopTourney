@@ -186,10 +186,53 @@
   text-decoration: none;
 }
 
+.custom-modal {
+        display: none;
+        position: fixed;
+        z-index: 999;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+    }
+    .custom-modal-content {
+        background: white;
+        padding: 2rem;
+        border-radius: 10px;
+        max-width: 500px;
+        width: 90%;
+        text-align: center;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+    .modal-buttons {
+        margin-top: 1rem;
+    }
+    .btn-cancel, .btn-confirm {
+        padding: 0.5rem 1rem;
+        margin: 0 0.5rem;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    .btn-cancel {
+        background-color: #ccc;
+    }
+    .btn-confirm {
+        background-color: #28a745;
+        color: white;
+    }
     </style>
 </head>
 
 <div class="container">
+    {{-- Flash Message Success --}}
+    @if (session('success'))
+        <div class="alert alert-success" style="background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; padding: 10px; border-radius: 5px; margin-bottom: 20px;">
+            {{ session('success') }}
+        </div>
+    @endif
+
     <h2>Detail Lomba</h2>
 
     <div class="card">
@@ -220,43 +263,88 @@
         <div style="text-align: center;">
             @if(auth()->id() === $tournament->users_id)
                 <a href="{{ route('tournament.edit', $tournament->id) }}" class="btn-edit">Edit Detail Tournament</a>
-
+        
                 @if($tournament->status === 'scheduled')
-                <form action="{{ route('generate.schedule', $tournament->id) }}" method="POST" style="display: inline;">
+                <form action="{{ route('generate.schedule', $tournament->id) }}" method="POST" id="generateForm" style="display: inline;">
                     @csrf
-                    <button type="submit" class="btn-success1" onclick="return confirmGeneration(event)">Generate Bracket & Jadwal</button>
-                </form>                
+                    <button type="button" class="btn-success1" onclick="openCustomModal()">Generate Bracket & Jadwal</button>
+                </form>            
                 @elseif($tournament->status === 'upcoming')
                     <a href="#" class="btn-success1 btn-disabled" disabled>Generate Bracket & Jadwal</a>
                     <p class="text-warning1">Untuk Generate Bracket dan Jadwal <br> Pastikan data daftar tim sudah fix dan ubah status tournament anda ke "Scheduled".</p>
                 @endif
             @endif
         </div>
-       <!-- Modal -->
-        <div id="customModal" class="modal" style="display: none;">
-            <div class="modal-content">
-                <p>Apakah Anda yakin ingin menggenerate bracket dan jadwal? Data sebelumnya akan dihapus.</p>
-                <div class="modal-actions">
-                    <button class="btn-cancel" onclick="closeModal()">Batal</button>
-                    <form action="{{ route('generate.bracket', $tournament->id) }}" method="POST" style="display: inline;">
-                        @csrf
-                        <button type="submit" class="btn-confirm">Ya, Generate</button>
-                    </form>
+
+        <!-- Modal for confirmation -->
+        <div id="customModal" class="custom-modal">
+            <div class="custom-modal-content">
+                <h2>Generate Bracket & Jadwal</h2>
+                <p>Apakah Anda yakin ingin menggenerate bracket dan jadwal?</p>
+                <p class="text-danger">Jika Anda sudah pernah melakukan generate sebelumnya, data sebelumnya akan dihapus dan dibuat ulang.</p>
+        
+                <div style="margin: 1rem 0;">
+                    <input type="checkbox" id="randomizeTeams">
+                    <label for="randomizeTeams">Randomize Team Order</label>
+                </div>
+        
+                <div class="modal-buttons">
+                    <button onclick="closeCustomModal()" class="btn-cancel">Cancel</button>
+                    <button onclick="submitGenerate()" class="btn-confirm">Generate</button>
                 </div>
             </div>
         </div>
-    </div>
-</div>
-@endsection
 
+        <script>
+            function openCustomModal() {
+                const modal = document.getElementById('customModal');
+                if (modal) {
+                    modal.style.display = 'flex';
+                    document.getElementById('randomizeTeams').checked = false;
+                }
+            }
+        
+            function closeCustomModal() {
+                const modal = document.getElementById('customModal');
+                if (modal) {
+                    modal.style.display = 'none';
+                }
+            }
+        
+            function submitGenerate() {
+                const form = document.getElementById('generateForm');
+                const randomizeInput = document.createElement('input');
+                randomizeInput.type = 'hidden';
+                randomizeInput.name = 'randomize_teams';
+                randomizeInput.value = document.getElementById('randomizeTeams').checked ? '1' : '0';
+                form.appendChild(randomizeInput);
+                form.submit();
+            }
+        </script>
+@endsection
+@push('scripts')
 <script>
-    function confirmGeneration(event) {
-        event.preventDefault();
-        if (confirm("Apakah Anda yakin ingin menggenerate bracket dan jadwal? Jika Anda sudah pernah melakukan generate sebelumnya, data sebelumnya akan dihapus dan dibuat ulang. Jika ini pertama kali, tidak ada masalah.")) {
-            event.target.closest("form").submit();
-        }
+    function openCustomModal() {
+        document.getElementById('customModal').style.display = 'flex';
+        document.getElementById('randomizeTeams').checked = false;
     }
 
+    function closeCustomModal() {
+        document.getElementById('customModal').style.display = 'none';
+    }
+
+    function submitGenerate() {
+        const form = document.getElementById('generateForm');
+        const randomizeInput = document.createElement('input');
+        randomizeInput.type = 'hidden';
+        randomizeInput.name = 'randomize_teams';
+        randomizeInput.value = document.getElementById('randomizeTeams').checked ? '1' : '0';
+        form.appendChild(randomizeInput);
+        form.submit();
+    }
+</script>
+@endpush
+<script>
     function openModal() {
         document.getElementById("customModal").style.display = "flex";
     }
