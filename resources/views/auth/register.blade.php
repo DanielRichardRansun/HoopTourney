@@ -13,7 +13,7 @@
                 <div class="d-flex justify-content-center">
                     <div class="form-check me-3">
                         <input class="form-check-input" type="radio" name="role" id="admin" value="1" required checked>
-                        <label class="form-check-label" for="admin">Admin</label>
+                        <label class="form-check-label" for="admin">Organizer</label>
                     </div>
                     <div class="form-check">
                         <input class="form-check-input" type="radio" name="role" id="team" value="2" required>

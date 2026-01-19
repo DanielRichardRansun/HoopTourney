@@ -15,18 +15,15 @@ class TournamentController extends Controller
 
         $now = Carbon::now();
 
-        // Update status ke 'ongoing'
         Tournament::whereDate('start_date', '<=', $now->toDateString())
             ->whereDate('end_date', '>=', $now->toDateString())
             ->where('status', '!=', 'ongoing')
             ->update(['status' => 'ongoing']);
 
-        // Update status ke 'completed' jika hari ini adalah end_date + 1
         Tournament::whereDate('end_date', '=', $now->copy()->subDay()->toDateString())
             ->where('status', '!=', 'completed')
             ->update(['status' => 'completed']);
 
-        // Query dan FILTER
         $query = Tournament::query();
 
         if ($request->has('search') && $request->search != '') {
@@ -51,15 +48,13 @@ class TournamentController extends Controller
         $user = Auth::user();
 
         if ($user->role == 1) {
-            // Jika admin, tampilkan turnamen yang mereka buat
+
             $tournaments = Tournament::where('users_id', $user->id)->get();
         } elseif ($user->role == 2) {
-            // Jika team, tampilkan turnamen yang diikuti oleh tim mereka
             $tournaments = Tournament::whereHas('teams', function ($query) use ($user) {
                 $query->where('teams.id', $user->team_id);
             })->get();
         } else {
-            // Jika bukan admin atau team, kosongkan list turnamen
             $tournaments = collect();
         }
 
@@ -70,19 +65,14 @@ class TournamentController extends Controller
 
     public function detail($id)
     {
-        // Mengambil data turnamen berdasarkan ID
         $tournament = Tournament::findOrFail($id);
-
-        // Mengirim data turnamen ke view detail_lomba.blade.php
         return view('tournaments.detail', compact('tournament'));
     }
 
 
     public function show($id)
     {
-        // Mencari turnamen berdasarkan ID
         $tournament = Tournament::findOrFail($id);
-        // Mengirim data turnamen ke view dashboard atau detail turnamen
         return view('dashboard.bracket', compact('tournament'));
     }
     public function edit($id)
@@ -133,7 +123,6 @@ class TournamentController extends Controller
             'end_date' => 'required|date|after_or_equal:start_date',
         ]);
 
-        // Simpan Tournament
         $tournament = Tournament::create([
             'name' => $request->name,
             'organizer' => $request->organizer,

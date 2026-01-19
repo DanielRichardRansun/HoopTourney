@@ -43,6 +43,7 @@ class BracketController extends Controller
             ];
 
 
+            //camps
             if ($schedule->round == $schedules->max('round') && $winnerId) {
                 $champion = Team::find($winnerId)->name ?? 'TBD';
             }

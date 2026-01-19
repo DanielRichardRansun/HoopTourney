@@ -108,11 +108,13 @@
                             @if ($user->role == 1)
                             <td class="action-buttons">
                                 <a href="{{ route('tournament.edit', $tournament->id) }}" class="btn-edit">Edit</a>
-                                <form action="{{ route('tournament.destroy', $tournament->id) }}" method="POST" style="display:inline;">
+                                 @if ($tournament->status == "upcoming")
+                               <form action="{{ route('tournament.destroy', $tournament->id) }}" method="POST" style="display:inline;">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn-delete" onclick="return confirm('Apakah Anda yakin ingin menghapus turnamen ini?')">Delete</button>
-                                </form>
+                                </form> 
+                                @endif
                             </td>
                             @endif
                         </tr>

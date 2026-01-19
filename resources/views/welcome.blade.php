@@ -202,9 +202,11 @@
         @endguest
 
         @auth
-        <div class="mb-2">
-            <a href="{{ route('tournament.create') }}" class="btn btn-primary">Buat Tourney</a>
-        </div>
+            @if (Auth::user()->role != 2)
+                <div class="mb-2">
+                    <a href="{{ route('tournament.create') }}" class="btn btn-primary">Buat Tourney</a>
+                </div>
+            @endif
         @endauth
 
         <div class="table-responsive">
@@ -350,9 +352,13 @@
                     @endforeach
                 </tbody>
             </table>
+            
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+            <div style="width: 100%; height: 400px; margin-top: 30px;">
+                <canvas id="topPerChart"></canvas>
+            </div>
         </div>
     </div>
-
 
     <!-- DataTables Scripts -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
@@ -363,4 +369,55 @@
             $('#tournamentTable').DataTable();
         });
     </script>
+
+    <script>
+    const ctx = document.getElementById('topPerChart').getContext('2d');
+
+    const playerNames = {!! json_encode($topPlayers->map(fn($p) => $p->player_name)) !!};
+    const perData = {!! json_encode($topPlayers->map(fn($p) => (float) $p->avg_per)) !!};
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: playerNames,
+            datasets: [{
+                label: 'PER (Player Efficiency Rating)',
+                data: perData,
+                backgroundColor: 'rgba(255, 159, 64, 0.7)',
+                borderColor: 'rgba(255, 159, 64, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'PER Value'
+                    }
+                },
+                x: {
+                    ticks: {
+                        autoSkip: false,
+                        maxRotation: 45,
+                        minRotation: 30
+                    }
+                }
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Top 10 Player Efficiency Rating (PER)'
+                },
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+</script>
+
 @endsection

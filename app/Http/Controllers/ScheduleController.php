@@ -85,7 +85,7 @@ class ScheduleController extends Controller
         $this->checkTournamentAdminAccess($id);
         $tournament = Tournament::findOrFail($id);
 
-        // Check if randomize teams is requested
+        // apakah dirandom?
         $randomizeTeams = request()->has('randomize_teams') && request('randomize_teams') == '1';
 
         Schedule::where('tournaments_id', $id)->delete();
@@ -96,7 +96,7 @@ class ScheduleController extends Controller
 
         foreach ($bracket as $roundMatches) {
             foreach ($roundMatches as $match) {
-                // Skip pertandingan di babak pertama jika ada tim yang bertemu dengan "Bye"
+                // skip match 1 kalo ketemu bye
                 if ($round === 1 && ($match[0] === '-' || $match[1] === '-')) {
                     continue;
                 }
@@ -127,24 +127,27 @@ class ScheduleController extends Controller
             return [];
         }
 
-        // Randomize team order if requested
+        // apakah dirandom?
         if ($randomizeTeams) {
             shuffle($teams);
         }
 
+        //hitung kebtuhan bye
         $totalTeams = count($teams);
         $powerOfTwo = 1;
 
         while ($powerOfTwo < $totalTeams) {
             $powerOfTwo *= 2;
         }
-
         $byesNeeded = $powerOfTwo - $totalTeams;
+
+
         $bracket = [];
         $matchupIndex = 0;
         $usedTeams = [];
         $nextRoundTeams = [];
 
+        //logic bracketnya round 1
         for ($i = 0; $i < $totalTeams; $i++) {
             if (count($usedTeams) < $totalTeams - $byesNeeded && !in_array($teams[$i], $usedTeams)) {
                 if ($i + 1 < $totalTeams && !in_array($teams[$i + 1], $usedTeams)) {
@@ -167,6 +170,7 @@ class ScheduleController extends Controller
             }
         }
 
+        //round lanjutan
         $rounds = log($powerOfTwo, 2);
         for ($round = 1; $round < $rounds; $round++) {
             $matchupCount = count($nextRoundTeams) / 2;

@@ -32,6 +32,6 @@ class Schedule extends Model
 
     public function matchResult()
     {
-        return $this->hasOne(MatchResults::class, 'schedules_id');
+        return $this->hasOne(MatchResult::class, 'schedules_id');
     }
 }
