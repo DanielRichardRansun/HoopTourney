@@ -38,8 +38,12 @@
                     <div class="absolute -top-10 -right-10 size-32 bg-[#f48c25]/10 rounded-full blur-3xl group-hover:bg-[#f48c25]/20 transition-all"></div>
                     
                     <!-- Team Logo Placeholder -->
-                    <div class="relative z-10 size-24 bg-gradient-to-tr from-[#181411] to-[#2c221c] rounded-full flex items-center justify-center border-2 border-[#393028] mb-6 shadow-inner group-hover:border-[#f48c25] transition-colors">
-                        <span class="material-symbols-outlined text-[40px] text-slate-600 group-hover:text-[#f48c25] transition-colors">groups</span>
+                    <div class="relative z-10 size-24 bg-gradient-to-tr from-[#181411] to-[#2c221c] rounded-full flex items-center justify-center border-2 border-[#393028] mb-6 shadow-inner group-hover:border-[#f48c25] transition-colors overflow-hidden shrink-0">
+                        @if($team->logo)
+                            <img src="{{ asset('images/logos/' . $team->logo) }}" alt="{{ $team->name }}" class="w-full h-full object-cover">
+                        @else
+                            <span class="material-symbols-outlined text-[40px] text-slate-600 group-hover:text-[#f48c25] transition-colors">groups</span>
+                        @endif
                     </div>
                     
                     <h3 class="relative z-10 text-xl font-black text-slate-100 mb-1 truncate w-full group-hover:text-[#f48c25] transition-colors uppercase italic">{{ $team->name }}</h3>

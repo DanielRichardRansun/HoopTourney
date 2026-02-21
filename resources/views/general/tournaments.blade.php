@@ -57,8 +57,12 @@
                 <!-- Tournament Card -->
                 <a href="{{ route('tournament.detail', $tournament->id) }}" class="group block rounded-2xl bg-[#221914]/80 backdrop-blur-md border border-[#393028] p-6 transition-all hover:-translate-y-2 hover:shadow-[0_10px_30px_-10px_rgba(244,140,37,0.2)] hover:border-[#f48c25]/30">
                     <div class="flex items-start justify-between mb-6">
-                        <div class="bg-[#181411] text-[#f48c25] size-14 rounded-xl flex items-center justify-center border border-[#f48c25]/20 group-hover:bg-[#f48c25] group-hover:text-[#181411] transition-colors">
-                            <span class="material-symbols-outlined !text-[32px]">sports_basketball</span>
+                        <div class="bg-[#181411] text-[#f48c25] size-14 rounded-xl flex items-center justify-center border border-[#f48c25]/20 group-hover:border-[#f48c25] transition-colors overflow-hidden shrink-0">
+                            @if($tournament->logo)
+                                <img src="{{ asset('images/logos/' . $tournament->logo) }}" alt="{{ $tournament->name }}" class="w-full h-full object-cover">
+                            @else
+                                <span class="material-symbols-outlined !text-[32px]">sports_basketball</span>
+                            @endif
                         </div>
                         @if ($tournament->status == 'ongoing')
                             <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-500/10 text-red-500 text-xs font-bold border border-red-500/20">

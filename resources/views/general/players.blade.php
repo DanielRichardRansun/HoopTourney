@@ -49,8 +49,12 @@
                     </div>
 
                     <!-- Player Photo Placeholder -->
-                    <div class="relative z-10 size-20 md:size-24 rounded-full bg-[#181411] border-2 border-[#393028] mb-4 flex items-center justify-center overflow-hidden group-hover:border-[#f48c25] transition-colors shadow-inner">
-                        <span class="material-symbols-outlined text-[40px] text-slate-600 group-hover:text-[#f48c25] transition-colors">person</span>
+                    <div class="relative z-10 size-20 md:size-24 rounded-full bg-[#181411] border-2 border-[#393028] mb-4 flex items-center justify-center overflow-hidden group-hover:border-[#f48c25] transition-colors shadow-inner shrink-0">
+                        @if($player->photo)
+                            <img src="{{ asset('images/profiles/' . $player->photo) }}" alt="{{ $player->name }}" class="w-full h-full object-cover">
+                        @else
+                            <span class="material-symbols-outlined text-[40px] text-slate-600 group-hover:text-[#f48c25] transition-colors">person</span>
+                        @endif
                     </div>
 
                     <!-- Player Info -->

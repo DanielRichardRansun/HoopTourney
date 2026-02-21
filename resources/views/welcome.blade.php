@@ -45,60 +45,90 @@
                 </div>
             </section>
 
-            <!-- Dashboard Grid -->
-            <div class="w-full max-w-[1400px] grid grid-cols-1 lg:grid-cols-12 gap-8">
-                <!-- Left Column: Tournaments & Stats (8 cols) -->
-                <div class="lg:col-span-8 flex flex-col gap-8">
-                    <!-- Section Header -->
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-2xl font-bold text-white flex items-center gap-2">
-                            <span class="material-symbols-outlined text-primary">emoji_events</span>
-                            Live Tournaments
-                        </h3>
-                        <a href="{{ route('tournaments.global') }}" class="text-sm text-primary hover:text-white transition-colors">View All</a>
-                    </div>
-                    
-                    <!-- Tournament Cards -->
-                    <div class="flex overflow-x-auto pb-4 gap-4 scrollbar-hide snap-x">
-                        @forelse($tournaments as $tournament)
-                            <div class="min-w-[300px] flex-1 glass-panel rounded-2xl p-5 hover:bg-[#2c221c] transition-colors cursor-pointer group snap-center border-l-4 {{ $tournament->status == 'ongoing' ? 'border-l-primary' : 'border-l-slate-700' }}"
-                                 onclick="window.location='{{ route('tournament.detail', $tournament->id) }}'">
-                                <div class="flex justify-between items-start mb-4">
-                                    @php
-                                        $statusClass = 'bg-slate-700/50 text-slate-300';
-                                        if($tournament->status == 'ongoing') $statusClass = 'bg-red-500/20 text-red-500';
-                                        elseif($tournament->status == 'upcoming') $statusClass = 'bg-primary/20 text-primary';
-                                        elseif($tournament->status == 'completed') $statusClass = 'bg-slate-800 text-slate-400';
-                                    @endphp
-                                    <span class="{{ $statusClass }} text-xs font-bold px-2 py-1 rounded uppercase">
-                                        {{ ucfirst($tournament->status) }}
-                                    </span>
-                                    <span class="text-slate-400 text-xs font-bold uppercase">{{ $tournament->organizer }}</span>
+            <!-- Live Tournaments (Full Width Section) -->
+            <div class="w-full max-w-[1400px] flex flex-col gap-6">
+                <!-- Section Header -->
+                <div class="flex items-center justify-between">
+                    <h3 class="text-2xl font-bold text-white flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">emoji_events</span>
+                        Live Tournaments
+                    </h3>
+                    <a href="{{ route('tournaments.global') }}" class="text-sm text-primary hover:text-white transition-colors">View All</a>
+                </div>
+                
+                <!-- Tournament Cards -->
+                <div class="flex overflow-x-auto pb-4 gap-6 scrollbar-hide snap-x">
+                    @forelse($tournaments as $tournament)
+                        <div class="min-w-[320px] max-w-[400px] flex-1 glass-panel rounded-2xl p-5 hover:bg-[#2c221c] transition-all hover:-translate-y-1 cursor-pointer group snap-center border-l-4 {{ $tournament->status == 'ongoing' ? 'border-l-primary' : 'border-l-slate-700' }}"
+                             onclick="window.location='{{ route('tournament.detail', $tournament->id) }}'">
+                            
+                            <div class="flex items-center gap-4 mb-4">
+                                <!-- Tournament Logo -->
+                                <div class="size-16 rounded-xl bg-[#181411] overflow-hidden border border-[#393028] flex-shrink-0 group-hover:border-primary/50 transition-colors">
+                                    @if($tournament->logo)
+                                        <img src="{{ asset('images/logos/' . $tournament->logo) }}" alt="{{ $tournament->name }}" class="w-full h-full object-cover">
+                                    @else
+                                        <div class="w-full h-full flex items-center justify-center text-primary bg-[#primary/10]">
+                                            <span class="material-symbols-outlined text-[32px]">sports_basketball</span>
+                                        </div>
+                                    @endif
                                 </div>
-                                <div class="flex flex-col gap-3">
-                                    <h4 class="text-white font-bold text-lg truncate">{{ $tournament->name }}</h4>
-                                    <div class="flex justify-between items-center text-xs text-slate-400 font-medium">
-                                        <span>Starts: {{ \Carbon\Carbon::parse($tournament->start_date)->format('M d, Y') }}</span>
+
+                                <!-- Title and Status -->
+                                <div class="flex flex-col flex-grow overflow-hidden">
+                                    <h4 class="text-white font-bold text-lg truncate mb-1 group-hover:text-primary transition-colors">{{ $tournament->name }}</h4>
+                                    <div class="flex items-center justify-between w-full">
+                                        @php
+                                            $statusClass = 'bg-slate-700/50 text-slate-300';
+                                            if($tournament->status == 'ongoing') $statusClass = 'bg-red-500/20 text-red-500';
+                                            elseif($tournament->status == 'upcoming') $statusClass = 'bg-primary/20 text-primary';
+                                            elseif($tournament->status == 'completed') $statusClass = 'bg-slate-800 text-slate-400';
+                                        @endphp
+                                        <span class="{{ $statusClass }} text-[10px] font-bold px-2 py-0.5 rounded uppercase flex items-center gap-1 w-fit">
+                                            @if($tournament->status == 'ongoing')
+                                                <span class="size-1.5 rounded-full bg-red-500 animate-pulse"></span>
+                                            @endif
+                                            {{ ucfirst($tournament->status) }}
+                                        </span>
+                                        
                                         @if(Auth::check() && Auth::user()->role == 2 && $tournament->status == 'upcoming')
                                             @php
                                                 $isJoined = DB::table('team_tournament')->where('team_id', Auth::user()->team_id)->where('tournament_id', $tournament->id)->exists();
                                             @endphp
                                             @if($isJoined)
-                                                <span class="text-green-500">Joined!</span>
+                                                <span class="text-green-500 text-xs font-bold">Joined!</span>
                                             @endif
                                         @endif
                                     </div>
                                 </div>
                             </div>
-                        @empty
-                            <div class="w-full glass-panel rounded-2xl p-8 text-center text-slate-400">
-                                No tournaments found.
+                            
+                            <!-- Swap Organizer and Date -->
+                            <div class="flex flex-col gap-2 pt-4 border-t border-[#393028]">
+                                <div class="flex justify-between items-center text-xs">
+                                    <span class="text-slate-500 uppercase font-bold tracking-wider">Starts</span>
+                                    <span class="text-slate-200 font-semibold">{{ \Carbon\Carbon::parse($tournament->start_date)->format('M d, Y') }}</span>
+                                </div>
+                                <div class="flex justify-between items-center text-xs">
+                                    <span class="text-slate-500 uppercase font-bold tracking-wider">Organizer</span>
+                                    <span class="text-slate-200 font-semibold truncate max-w-[150px] text-right" title="{{ $tournament->organizer }}">{{ $tournament->organizer }}</span>
+                                </div>
                             </div>
-                        @endforelse
-                    </div>
+                        </div>
+                    @empty
+                        <div class="w-full glass-panel rounded-2xl p-8 text-center text-slate-400">
+                            No tournaments found.
+                        </div>
+                    @endforelse
+                </div>
+            </div>
 
+            <!-- Lower Dashboard Grid -->
+            <div class="w-full max-w-[1400px] grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <!-- Left Column: Analytics Chart (7 cols) -->
+                <div class="lg:col-span-7 flex flex-col gap-8">
                     <!-- Analytics Chart Section -->
-                    <div class="glass-panel rounded-2xl p-6 border border-[#393028]">
+                    <div class="glass-panel rounded-2xl p-6 border border-[#393028] flex-1 flex flex-col justify-between">
                         <div class="flex items-center justify-between mb-6">
                             <div>
                                 <h3 class="text-xl font-bold text-white">League Efficiency Rating (PER)</h3>
@@ -110,19 +140,21 @@
                                 </button>
                             </div>
                         </div>
-                        <div class="relative w-full h-[300px]">
+                        <div class="relative w-full flex-1 min-h-[300px]">
                             <canvas id="perChart"></canvas>
                         </div>
-                        <div class="pt-4 mt-2 text-center border-t border-[#393028]">
-                            <a href="{{ route('statistics.global') }}" class="inline-block text-xs font-bold text-primary hover:text-white uppercase tracking-wider transition-colors pt-2">View Full Statistics</a>
+                        <div class="pt-4 mt-6 text-center border-t border-[#393028]">
+                            <a href="{{ route('statistics.global') }}" class="inline-block text-xs font-bold text-primary hover:text-white uppercase tracking-wider transition-colors">View Full Statistics</a>
                         </div>
                     </div>
                 </div>
 
-                <!-- Right Column: Leaderboard (4 cols) -->
-                <div class="lg:col-span-4 flex flex-col gap-6">
+                <!-- Right Column: Leaderboard & Top Teams (5 cols) -->
+                <div class="lg:col-span-5 flex flex-col gap-6">
+                    
+                    <!-- Top Players -->
                     <div class="flex items-center justify-between">
-                        <h3 class="text-2xl font-bold text-white flex items-center gap-2">
+                        <h3 class="text-xl font-bold text-white flex items-center gap-2">
                             <span class="material-symbols-outlined text-yellow-500">leaderboard</span>
                             Top Players
                         </h3>
@@ -133,15 +165,16 @@
                             ->select(
                                 'players.id',
                                 'players.name as player_name',
+                                'players.photo',
                                 'teams.name as team_name',
                                 DB::raw('ROUND(AVG(player_stats.point), 1) as avg_points'),
                                 DB::raw('ROUND(AVG(player_stats.per), 1) as avg_per')
                             )
                             ->join('players', 'player_stats.players_id', '=', 'players.id')
                             ->join('teams', 'players.teams_id', '=', 'teams.id')
-                            ->groupBy('players.id', 'players.name', 'teams.name')
+                            ->groupBy('players.id', 'players.name', 'players.photo', 'teams.name')
                             ->orderBy('avg_per', 'DESC')
-                            ->limit(5)
+                            ->limit(3)
                             ->get();
                     @endphp
 
@@ -172,15 +205,19 @@
                                         </td>
                                         <td class="p-4">
                                             <div class="flex items-center gap-3">
-                                                <div class="size-8 rounded-full bg-slate-700 flex items-center justify-center text-[10px] font-bold text-white">
-                                                    @php
-                                                        $initials = collect(explode(' ', $player->player_name))->map(fn($n) => strtoupper(substr($n, 0, 1)))->take(2)->join('');
-                                                    @endphp
-                                                    {{ $initials }}
+                                                <div class="size-10 rounded-full bg-[#181411] overflow-hidden border border-[#393028] flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0">
+                                                    @if($player->photo)
+                                                        <img src="{{ asset('images/profiles/' . $player->photo) }}" alt="{{ $player->player_name }}" class="w-full h-full object-cover">
+                                                    @else
+                                                        @php
+                                                            $initials = collect(explode(' ', $player->player_name))->map(fn($n) => strtoupper(substr($n, 0, 1)))->take(2)->join('');
+                                                        @endphp
+                                                        {{ $initials }}
+                                                    @endif
                                                 </div>
-                                                <div>
-                                                    <div class="text-white text-sm font-bold">{{ $player->player_name }}</div>
-                                                    <div class="text-slate-500 text-xs">{{ $player->team_name }}</div>
+                                                <div class="min-w-0">
+                                                    <div class="text-white text-sm font-bold truncate">{{ $player->player_name }}</div>
+                                                    <div class="text-slate-500 text-[11px] truncate">{{ $player->team_name }}</div>
                                                 </div>
                                             </div>
                                         </td>
@@ -196,15 +233,51 @@
                         </div>
                     </div>
 
-                    <!-- Highlight Stat Card -->
-                    <div class="glass-panel rounded-2xl p-5 border border-primary/20 relative overflow-hidden group">
-                        <div class="absolute -right-6 -top-6 w-24 h-24 bg-primary/20 rounded-full blur-2xl group-hover:bg-primary/30 transition-all"></div>
-                        <h4 class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Tournament Focus</h4>
-                        <div class="flex items-end gap-2">
-                            <span class="text-4xl font-black text-white">{{ $tournaments->count() }}</span>
-                            <span class="text-sm font-medium text-slate-400 mb-2">Active {{ Str::plural('Tournament', $tournaments->count()) }}</span>
+                    <!-- Top Teams -->
+                    <div class="flex items-center justify-between mt-4">
+                        <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                            <span class="material-symbols-outlined text-emerald-500">groups</span>
+                            Top Teams
+                        </h3>
+                    </div>
+
+                    @php
+                        $topTeams = DB::table('teams')
+                            ->select('teams.*', DB::raw('ROUND(AVG(player_stats.per), 1) as avg_per'))
+                            ->join('players', 'teams.id', '=', 'players.teams_id')
+                            ->join('player_stats', 'players.id', '=', 'player_stats.players_id')
+                            ->groupBy('teams.id', 'teams.name', 'teams.coach', 'teams.manager', 'teams.logo', 'teams.created_at', 'teams.updated_at')
+                            ->orderBy('avg_per', 'DESC')
+                            ->limit(3)
+                            ->get();
+                    @endphp
+
+                    <div class="glass-panel rounded-2xl overflow-hidden border border-[#393028]">
+                        <div class="divide-y divide-[#2f261f]">
+                            @foreach($topTeams as $index => $team)
+                                <div class="p-4 flex items-center justify-between group hover:bg-[#2c221c] transition-colors cursor-pointer"
+                                     onclick="window.location='{{ route('teams.global') }}'">
+                                    <div class="flex items-center gap-4 min-w-0">
+                                        <div class="text-slate-500 text-sm font-black w-3">{{ $index + 1 }}</div>
+                                        <div class="size-10 rounded bg-[#181411] border border-[#393028] overflow-hidden flex-shrink-0 group-hover:border-emerald-500/50 transition-colors">
+                                            @if($team->logo)
+                                                <img src="{{ asset('images/logos/' . $team->logo) }}" alt="{{ $team->name }}" class="w-full h-full object-cover">
+                                            @else
+                                                <span class="material-symbols-outlined text-slate-500 m-2">shield</span>
+                                            @endif
+                                        </div>
+                                        <div class="min-w-0">
+                                            <h4 class="text-slate-100 font-bold text-sm uppercase italic truncate">{{ $team->name }}</h4>
+                                            <p class="text-slate-500 text-[11px] truncate">PER: <span class="text-emerald-500 font-bold">{{ number_format($team->avg_per, 1) }}</span></p>
+                                        </div>
+                                    </div>
+                                    <span class="material-symbols-outlined text-slate-600 group-hover:text-emerald-500 transition-colors">chevron_right</span>
+                                </div>
+                            @endforeach
                         </div>
-                        <p class="text-sm text-primary mt-1 font-medium">Join the action today!</p>
+                        <div class="p-3 bg-[#2c221c] text-center border-t border-[#393028]">
+                            <a href="{{ route('teams.global') }}" class="inline-block w-full text-xs font-bold text-emerald-500 hover:text-white uppercase tracking-wider transition-colors">View All Teams</a>
+                        </div>
                     </div>
                 </div>
             </div>
