@@ -25,7 +25,7 @@
             <div class="bracket">
                 @foreach ($bracket as $index => $round)
                     <div class="round">
-                        <div class="round-title">{{ $roundLabels[$index] ?? 'Round ' . ($index + 1) }}</div>
+                        <div class="round-title">{{ is_numeric($index) ? ($roundLabels[$index] ?? 'Round ' . ($index + 1)) : $index }}</div>
                         <div class="matchups">
                             @foreach ($round as $matchup)
                             @if ($matchup[0]['name'] !== '-' && $matchup[1]['name'] !== '-')
