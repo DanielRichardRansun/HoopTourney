@@ -147,6 +147,59 @@
                             <a href="{{ route('statistics.global') }}" class="inline-block text-xs font-bold text-primary hover:text-white uppercase tracking-wider transition-colors">View Full Statistics</a>
                         </div>
                     </div>
+
+                    <!-- Top Teams (By PER) header now moved to middle col if preferred, but leaving layout intact. Moving View All Teams here -->
+                    
+                    <!-- Top Scoring Teams box -->
+                    @php
+                        $topScoringTeams = DB::table('teams')
+                            ->select('teams.id', 'teams.name', 'teams.logo', DB::raw('ROUND(AVG(player_stats.point), 1) as avg_points'))
+                            ->join('players', 'teams.id', '=', 'players.teams_id')
+                            ->join('player_stats', 'players.id', '=', 'player_stats.players_id')
+                            ->groupBy('teams.id', 'teams.name', 'teams.logo')
+                            ->orderBy('avg_points', 'DESC')
+                            ->limit(5)
+                            ->get();
+                    @endphp
+
+                    <div class="glass-panel p-6 rounded-2xl border border-[#393028] mt-6 flex flex-col items-start w-full">
+                        <div class="flex items-center justify-between w-full mb-6">
+                            <div>
+                                <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-orange-500">local_fire_department</span>
+                                    Top Scoring Teams
+                                </h3>
+                                <p class="text-slate-400 text-sm mt-1">Highest average team points per game</p>
+                            </div>
+                        </div>
+                        
+                        <div class="w-full flex flex-col gap-4">
+                            @foreach($topScoringTeams as $index => $team)
+                                <div class="flex items-center justify-between p-3 rounded-xl bg-[#181411] border border-[#393028] group hover:border-orange-500/50 transition-colors">
+                                    <div class="flex items-center gap-3 min-w-0">
+                                        <div class="text-slate-500 font-black text-sm w-4 flex-shrink-0">{{ $index + 1 }}</div>
+                                        <div class="size-10 rounded-full bg-[#221914] overflow-hidden flex items-center justify-center border border-[#393028] flex-shrink-0">
+                                            @if($team->logo)
+                                                <img src="{{ asset('images/logos/' . $team->logo) }}" alt="{{ $team->name }}" class="w-full h-full object-cover">
+                                            @else
+                                                <span class="material-symbols-outlined text-slate-600 text-[18px]">sports_basketball</span>
+                                            @endif
+                                        </div>
+                                        <div class="truncate">
+                                            <h4 class="text-white font-bold text-sm uppercase italic truncate">{{ $team->name }}</h4>
+                                        </div>
+                                    </div>
+                                    <div class="text-right pl-4">
+                                        <span class="text-orange-500 font-black text-lg">{{ number_format($team->avg_points, 1) }}</span>
+                                        <span class="text-slate-500 text-[10px] block uppercase tracking-wider">PPG</span>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                        <div class="pt-4 mt-6 text-center border-t border-[#393028] w-full">
+                            <a href="{{ route('teams.global') }}" class="inline-block text-xs font-bold text-orange-500 hover:text-white uppercase tracking-wider transition-colors">View All Teams</a>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Right Column: Leaderboard & Top Teams (5 cols) -->
@@ -174,7 +227,7 @@
                             ->join('teams', 'players.teams_id', '=', 'teams.id')
                             ->groupBy('players.id', 'players.name', 'players.photo', 'teams.name')
                             ->orderBy('avg_per', 'DESC')
-                            ->limit(3)
+                            ->limit(5)
                             ->get();
                     @endphp
 
@@ -229,7 +282,7 @@
                             </tbody>
                         </table>
                         <div class="p-3 bg-[#2c221c] text-center border-t border-[#393028]">
-                            <a href="{{ route('statistics.global') }}" class="inline-block w-full text-xs font-bold text-primary hover:text-white uppercase tracking-wider transition-colors">View Full Leaderboard</a>
+                            <a href="{{ route('statistics.global') }}" class="inline-block w-full text-xs font-bold text-emerald-500 hover:text-white uppercase tracking-wider transition-colors">View Full Leaderboard</a>
                         </div>
                     </div>
 
@@ -248,7 +301,7 @@
                             ->join('player_stats', 'players.id', '=', 'player_stats.players_id')
                             ->groupBy('teams.id', 'teams.name', 'teams.coach', 'teams.manager', 'teams.logo', 'teams.created_at', 'teams.updated_at')
                             ->orderBy('avg_per', 'DESC')
-                            ->limit(3)
+                            ->limit(5)
                             ->get();
                     @endphp
 
@@ -276,7 +329,7 @@
                             @endforeach
                         </div>
                         <div class="p-3 bg-[#2c221c] text-center border-t border-[#393028]">
-                            <a href="{{ route('teams.global') }}" class="inline-block w-full text-xs font-bold text-emerald-500 hover:text-white uppercase tracking-wider transition-colors">View All Teams</a>
+                            <a href="{{ route('statistics.global') }}" class="inline-block w-full text-xs font-bold text-emerald-500 hover:text-white uppercase tracking-wider transition-colors">View Full Leaderboard</a>
                         </div>
                     </div>
                 </div>

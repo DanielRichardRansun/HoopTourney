@@ -66,7 +66,7 @@ class TournamentController extends Controller
 
         $tournaments = $query
             ->orderByRaw("FIELD(status, 'ongoing', 'upcoming', 'scheduled', 'completed')")
-            ->get();
+            ->paginate(12);
 
         return view('general.tournaments', compact('tournaments'));
     }

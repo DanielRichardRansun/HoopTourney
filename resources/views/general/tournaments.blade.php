@@ -41,12 +41,13 @@
             </div>
 
             <!-- Search -->
-            <form action="{{ route('tournaments.global') }}" method="GET" class="relative w-full md:w-auto">
+            <form id="searchForm" action="{{ route('tournaments.global') }}" method="GET" class="relative w-full md:w-auto">
                 @if(request('status'))
                     <input type="hidden" name="status" value="{{ request('status') }}">
                 @endif
                 <input type="text" name="search" value="{{ request('search') }}" placeholder="Search tournaments..." 
-                       class="w-full md:w-72 bg-[#221914] border border-[#393028] text-slate-200 text-sm rounded-full pl-12 pr-4 py-3 focus:outline-none focus:border-[#f48c25] focus:ring-1 focus:ring-[#f48c25] transition-all placeholder:text-slate-500">
+                       class="w-full md:w-72 bg-[#221914] border border-[#393028] text-slate-200 text-sm rounded-full pl-12 pr-4 py-3 focus:outline-none focus:border-[#f48c25] focus:ring-1 focus:ring-[#f48c25] transition-all placeholder:text-slate-500"
+                       oninput="clearTimeout(this.delay); this.delay = setTimeout(() => document.getElementById('searchForm').submit(), 500);">
                 <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">search</span>
             </form>
         </div>
@@ -109,6 +110,11 @@
                     <p class="text-slate-500">There are currently no tournaments matching your criteria.</p>
                 </div>
             @endforelse
+        </div>
+
+        <!-- Pagination -->
+        <div class="mt-12 w-full custom-pagination">
+            {{ $tournaments->appends(request()->query())->links() }}
         </div>
     </section>
 </main>

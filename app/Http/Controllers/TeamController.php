@@ -65,7 +65,7 @@ class TeamController extends Controller
                   ->orWhere('coach', 'like', '%' . $request->search . '%');
         }
 
-        $teams = $query->withCount('players')->get();
+        $teams = $query->withCount('players')->paginate(20);
 
         return view('general.teams', compact('teams'));
     }

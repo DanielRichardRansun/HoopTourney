@@ -96,10 +96,10 @@
             </a>
             
             <div class="hidden md:flex items-center gap-6 lg:gap-9">
-                <a class="text-slate-300 hover:text-primary transition-colors text-sm font-medium leading-normal" href="{{ route('tournaments.global') }}">Tournaments</a>
-                <a class="text-slate-300 hover:text-primary transition-colors text-sm font-medium leading-normal" href="{{ route('teams.global') }}">Teams</a>
-                <a class="text-slate-300 hover:text-primary transition-colors text-sm font-medium leading-normal" href="{{ route('players.global') }}">Players</a>
-                <a class="text-slate-300 hover:text-primary transition-colors text-sm font-medium leading-normal" href="{{ route('statistics.global') }}">Statistics</a>
+                <a class="{{ request()->routeIs('tournaments.global') ? 'text-primary border-b-2 border-primary -mb-0.5 pb-0.5' : 'text-slate-300 hover:text-primary' }} transition-colors text-sm font-bold leading-normal relative" href="{{ route('tournaments.global') }}">Tournaments</a>
+                <a class="{{ request()->routeIs('teams.global') ? 'text-primary border-b-2 border-primary -mb-0.5 pb-0.5' : 'text-slate-300 hover:text-primary' }} transition-colors text-sm font-bold leading-normal relative" href="{{ route('teams.global') }}">Teams</a>
+                <a class="{{ request()->routeIs('players.global') ? 'text-primary border-b-2 border-primary -mb-0.5 pb-0.5' : 'text-slate-300 hover:text-primary' }} transition-colors text-sm font-bold leading-normal relative" href="{{ route('players.global') }}">Players</a>
+                <a class="{{ request()->routeIs('statistics.global') ? 'text-primary border-b-2 border-primary -mb-0.5 pb-0.5' : 'text-slate-300 hover:text-primary' }} transition-colors text-sm font-bold leading-normal relative" href="{{ route('statistics.global') }}">Statistics</a>
                 @auth
                     <a class="bg-primary/10 border border-primary/50 text-white hover:bg-primary hover:text-black transition-all text-[11px] font-black uppercase tracking-widest px-4 py-2 rounded-full shadow-[0_4px_15px_-5px_rgba(244,140,37,0.3)]" href="{{ route('tournament.mine') }}">
                         My Tourneys

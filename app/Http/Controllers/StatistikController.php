@@ -94,6 +94,7 @@ class StatistikController extends Controller
         $topPlayers = Player::select(
                 'players.id',
                 'players.name as player_name',
+                'players.photo',
                 'teams.name as team_name'
             )
             ->join('teams', 'players.teams_id', '=', 'teams.id')
@@ -105,7 +106,7 @@ class StatistikController extends Controller
             ->selectRaw('ROUND(AVG(player_stats.stl), 1) as avg_steals')
             ->selectRaw('ROUND(AVG(player_stats.per), 1) as avg_per')
             ->join('player_stats', 'players.id', '=', 'player_stats.players_id')
-            ->groupBy('players.id', 'players.name', 'teams.name')
+            ->groupBy('players.id', 'players.name', 'players.photo', 'teams.name')
             ->havingRaw('COUNT(player_stats.id) > 0') // Only players who have played
             ->get();
 
@@ -118,7 +119,7 @@ class StatistikController extends Controller
 
         // 2. Team Statistics
         // Calculating team averages based on their players' stats
-        $topTeams = Team::select('teams.id', 'teams.name')
+        $allTeamStats = Team::select('teams.id', 'teams.name', 'teams.logo')
             ->join('players', 'teams.id', '=', 'players.teams_id')
             ->join('player_stats', 'players.id', '=', 'player_stats.players_id')
             ->selectRaw('ROUND(AVG(player_stats.point), 1) as avg_points')
@@ -127,12 +128,15 @@ class StatistikController extends Controller
             ->selectRaw('ROUND(AVG(player_stats.blk), 1) as avg_blocks')
             ->selectRaw('ROUND(AVG(player_stats.stl), 1) as avg_steals')
             ->selectRaw('ROUND(AVG(player_stats.per), 1) as avg_per')
-            ->groupBy('teams.id', 'teams.name')
+            ->groupBy('teams.id', 'teams.name', 'teams.logo')
             ->havingRaw('COUNT(player_stats.id) > 0')
-            ->orderByDesc('avg_per')
-            ->take(5)
             ->get();
 
+        $topTeamPer = $allTeamStats->sortByDesc('avg_per')->take(5);
+        $topTeamPts = $allTeamStats->sortByDesc('avg_points')->take(5);
+        $topTeamAst = $allTeamStats->sortByDesc('avg_assists')->take(5);
+        $topTeamReb = $allTeamStats->sortByDesc('avg_rebounds')->take(5);
+        $topTeamStl = $allTeamStats->sortByDesc('avg_steals')->take(5);
 
         // 3. Tournament Statistics (General Overview)
         $overviewStats = [
@@ -145,7 +149,7 @@ class StatistikController extends Controller
 
         return view('general.statistics', compact(
             'topScorers', 'topAssists', 'topRebounds', 'topBlocks', 'topSteals', 'topPer',
-            'topTeams', 'overviewStats'
+            'topTeamPer', 'topTeamPts', 'topTeamAst', 'topTeamReb', 'topTeamStl', 'overviewStats'
         ));
     }
 }

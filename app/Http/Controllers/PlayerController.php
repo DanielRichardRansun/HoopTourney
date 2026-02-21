@@ -78,7 +78,7 @@ class PlayerController extends Controller
                   ->orWhere('position', 'like', '%' . $request->search . '%');
         }
 
-        $players = $query->get();
+        $players = $query->paginate(25);
 
         return view('general.players', compact('players'));
     }
