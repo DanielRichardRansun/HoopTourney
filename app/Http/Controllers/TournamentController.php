@@ -41,6 +41,36 @@ class TournamentController extends Controller
         return view('welcome', compact('tournaments'));
     }
 
+    public function allTournaments(Request $request)
+    {
+        $now = Carbon::now();
+
+        Tournament::whereDate('start_date', '<=', $now->toDateString())
+            ->whereDate('end_date', '>=', $now->toDateString())
+            ->where('status', '!=', 'ongoing')
+            ->update(['status' => 'ongoing']);
+
+        Tournament::whereDate('end_date', '=', $now->copy()->subDay()->toDateString())
+            ->where('status', '!=', 'completed')
+            ->update(['status' => 'completed']);
+
+        $query = Tournament::query();
+
+        if ($request->has('search') && $request->search != '') {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        if ($request->has('status') && $request->status != 'all') {
+            $query->where('status', $request->status);
+        }
+
+        $tournaments = $query
+            ->orderByRaw("FIELD(status, 'ongoing', 'upcoming', 'scheduled', 'completed')")
+            ->get();
+
+        return view('general.tournaments', compact('tournaments'));
+    }
+
 
 
     public function myTournaments()

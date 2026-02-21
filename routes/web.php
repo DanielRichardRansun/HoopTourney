@@ -71,6 +71,12 @@ Route::get('/dashboard/jadwal/{id_tournament}/matchresult/{id_schedule}', [Match
 // Route untuk halaman welcome yang menampilkan daftar turnamen
 Route::get('/', [TournamentController::class, 'index'])->name('welcome');
 
+// Global General Pages
+Route::get('/tournaments', [TournamentController::class, 'allTournaments'])->name('tournaments.global');
+Route::get('/teams-global', [TeamController::class, 'allTeams'])->name('teams.global');
+Route::get('/players-global', [PlayerController::class, 'allPlayers'])->name('players.global');
+Route::get('/statistics-global', [StatistikController::class, 'globalStats'])->name('statistics.global');
+
 //Sheet Import & Download
 Route::get(
     '/tournaments/{id_tournament}/schedules/{id_schedule}/download-template',

@@ -1,142 +1,6 @@
-<!DOCTYPE html>
-<html class="dark" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ config('app.name', 'HoopTourney') }} - Welcome</title>
+@extends('layouts.general')
 
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com" rel="preconnect"/>
-    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
-    
-    <!-- Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <!-- Tailwind Config -->
-    <script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#f48c25",
-                        "background-light": "#f8f7f5",
-                        "background-dark": "#181411",
-                        "card-dark": "#221914",
-                        "card-hover": "#2c221c",
-                        "table-header": "#2f261f",
-                    },
-                    fontFamily: {
-                        "display": ["Lexend", "sans-serif"]
-                    },
-                    borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
-                },
-            },
-        }
-    </script>
-
-    <style>
-        /* Custom scrollbar for webkit */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #181411; 
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #393028; 
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #f48c25; 
-        }
-
-        .glass-panel {
-            background: rgba(34, 25, 20, 0.7);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-        
-        .glow-text {
-            text-shadow: 0 0 20px rgba(244, 140, 37, 0.3);
-        }
-        
-        .gold-row {
-            background: linear-gradient(90deg, rgba(255, 215, 0, 0.1) 0%, rgba(34, 25, 20, 0) 100%);
-            border-left: 4px solid #FFD700;
-        }
-        .silver-row {
-            background: linear-gradient(90deg, rgba(192, 192, 192, 0.1) 0%, rgba(34, 25, 20, 0) 100%);
-            border-left: 4px solid #C0C0C0;
-        }
-        .bronze-row {
-            background: linear-gradient(90deg, rgba(205, 127, 50, 0.1) 0%, rgba(34, 25, 20, 0) 100%);
-            border-left: 4px solid #CD7F32;
-        }
-    </style>
-</head>
-<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display selection:bg-primary selection:text-white overflow-x-hidden">
-    <!-- Wrapper -->
-    <div class="relative flex h-auto min-h-screen w-full flex-col">
-        <!-- Header / Nav -->
-        <header class="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap border-b border-solid border-[#393028] bg-[#181411]/95 backdrop-blur-md px-6 py-3 lg:px-10">
-            <div class="flex items-center gap-8">
-                <a href="{{ url('/') }}" class="flex items-center gap-4 text-white hover:opacity-80 transition-opacity">
-                    <img src="{{ asset('images/logo.png') }}" alt="Logo" class="size-10 object-contain">
-                    <h2 class="text-white text-xl font-black leading-tight tracking-tight uppercase italic">HOOP TOURNEY</h2>
-                </a>
-                <div class="hidden md:flex items-center gap-9">
-                    <a class="text-slate-300 hover:text-primary transition-colors text-sm font-medium leading-normal" href="#">Tournaments</a>
-                    <a class="text-slate-300 hover:text-primary transition-colors text-sm font-medium leading-normal" href="#">Teams</a>
-                    <a class="text-slate-300 hover:text-primary transition-colors text-sm font-medium leading-normal" href="#">Players</a>
-                    @auth
-                        <a class="text-slate-300 hover:text-primary transition-colors text-sm font-medium leading-normal" href="{{ route('tournament.mine') }}">My Tourneys</a>
-                    @endauth
-                </div>
-            </div>
-            <div class="flex flex-1 justify-end gap-6 items-center">
-                <label class="hidden lg:flex flex-col min-w-40 !h-10 max-w-64">
-                    <div class="flex w-full flex-1 items-stretch rounded-full h-full border border-[#393028] bg-[#221914] overflow-hidden group focus-within:border-primary/50 transition-colors">
-                        <div class="text-[#baab9c] flex bg-transparent items-center justify-center pl-4 pr-2">
-                            <span class="material-symbols-outlined text-[20px]">search</span>
-                        </div>
-                        <input class="flex w-full min-w-0 flex-1 resize-none overflow-hidden bg-transparent text-white focus:outline-0 focus:ring-0 border-none h-full placeholder:text-[#baab9c]/50 px-0 text-sm font-normal leading-normal" placeholder="Search players, teams..." value=""/>
-                    </div>
-                </label>
-                <div class="flex gap-3">
-                    @guest
-                        <a href="{{ route('login') }}" class="flex items-center justify-center rounded-full h-10 px-6 bg-[#2c221c] hover:bg-[#3a2e26] text-white text-sm font-bold leading-normal transition-colors border border-[#393028]">
-                            <span class="truncate">Log In</span>
-                        </a>
-                        <a href="{{ route('register') }}" class="flex items-center justify-center rounded-full h-10 px-6 bg-primary hover:bg-orange-600 text-[#181411] text-sm font-bold leading-normal transition-colors shadow-[0_0_15px_rgba(244,140,37,0.4)]">
-                            <span class="truncate">Join League</span>
-                        </a>
-                    @else
-                        <div class="flex items-center gap-4">
-                            <span class="text-slate-300 text-sm font-medium">Hello, {{ Auth::user()->name }}</span>
-                            <form action="{{ route('logout') }}" method="POST" class="inline border-l border-[#393028] pl-4">
-                                @csrf
-                                <button type="submit" class="flex items-center justify-center rounded-full h-10 px-6 bg-[#2c221c] hover:bg-[#3a2e26] text-white text-sm font-bold leading-normal transition-colors border border-[#393028]">
-                                    Log Out
-                                </button>
-                            </form>
-                        </div>
-                    @endguest
-                </div>
-            </div>
-        </header>
-
-        <!-- Main Content -->
+@section('content')
         <main class="flex-1 flex flex-col items-center w-full px-4 py-8 md:px-10 lg:px-20 gap-10">
             <!-- Hero Banner -->
             <section class="w-full max-w-[1400px] rounded-2xl overflow-hidden relative min-h-[400px] flex items-center p-8 md:p-16 group">
@@ -173,10 +37,10 @@
                                 Register Now
                             </a>
                         @endauth
-                        <button class="flex items-center gap-2 rounded-full h-14 px-8 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border border-white/10 text-base font-bold transition-all">
+                        <a href="{{ route('tournaments.global') }}" class="flex items-center gap-2 rounded-full h-14 px-8 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border border-white/10 text-base font-bold transition-all">
                             <span class="material-symbols-outlined">emoji_events</span>
                             All Competitions
-                        </button>
+                        </a>
                     </div>
                 </div>
             </section>
@@ -191,7 +55,7 @@
                             <span class="material-symbols-outlined text-primary">emoji_events</span>
                             Live Tournaments
                         </h3>
-                        <button class="text-sm text-primary hover:text-white transition-colors">View All</button>
+                        <a href="{{ route('tournaments.global') }}" class="text-sm text-primary hover:text-white transition-colors">View All</a>
                     </div>
                     
                     <!-- Tournament Cards -->
@@ -248,6 +112,9 @@
                         </div>
                         <div class="relative w-full h-[300px]">
                             <canvas id="perChart"></canvas>
+                        </div>
+                        <div class="pt-4 mt-2 text-center border-t border-[#393028]">
+                            <a href="{{ route('statistics.global') }}" class="inline-block text-xs font-bold text-primary hover:text-white uppercase tracking-wider transition-colors pt-2">View Full Statistics</a>
                         </div>
                     </div>
                 </div>
@@ -325,7 +192,7 @@
                             </tbody>
                         </table>
                         <div class="p-3 bg-[#2c221c] text-center border-t border-[#393028]">
-                            <button class="text-xs font-bold text-primary hover:text-white uppercase tracking-wider transition-colors">View Full Leaderboard</button>
+                            <a href="{{ route('statistics.global') }}" class="inline-block w-full text-xs font-bold text-primary hover:text-white uppercase tracking-wider transition-colors">View Full Leaderboard</a>
                         </div>
                     </div>
 
@@ -342,21 +209,8 @@
                 </div>
             </div>
 
-            <!-- Footer -->
-            <footer class="w-full max-w-[1400px] mt-10 border-t border-[#393028] pt-8 pb-10 flex flex-col md:flex-row justify-between items-center gap-6">
-                <div class="flex items-center gap-2 text-slate-500">
-                    <span class="material-symbols-outlined text-[20px]">sports_basketball</span>
-                    <span class="text-sm font-bold">HOOP TOURNEY © {{ date('Y') }}</span>
-                </div>
-                <div class="flex gap-6">
-                    <a class="text-sm text-slate-500 hover:text-primary transition-colors" href="#">Privacy Policy</a>
-                    <a class="text-sm text-slate-500 hover:text-primary transition-colors" href="#">Terms of Service</a>
-                    <a class="text-sm text-slate-500 hover:text-primary transition-colors" href="#">Support</a>
-                </div>
-            </footer>
-        </main>
-    </div>
-
+@endsection
+@push('scripts')
     <!-- Chart Configuration Script -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -433,5 +287,4 @@
             });
         });
     </script>
-</body>
-</html>
+@endpush

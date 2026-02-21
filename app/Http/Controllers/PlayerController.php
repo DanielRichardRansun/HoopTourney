@@ -67,4 +67,19 @@ class PlayerController extends Controller
             ], 500);
         }
     }
+
+    // Menampilkan semua pemain untuk halaman global
+    public function allPlayers(Request $request)
+    {
+        $query = Player::with('team');
+
+        if ($request->has('search') && $request->search != '') {
+            $query->where('name', 'like', '%' . $request->search . '%')
+                  ->orWhere('position', 'like', '%' . $request->search . '%');
+        }
+
+        $players = $query->get();
+
+        return view('general.players', compact('players'));
+    }
 }

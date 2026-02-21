@@ -54,4 +54,19 @@ class TeamController extends Controller
 
         return redirect()->back()->with('success', 'Informasi tim berhasil diperbarui');
     }
+
+    // Menampilkan semua tim untuk halaman global
+    public function allTeams(Request $request)
+    {
+        $query = Team::query();
+        
+        if ($request->has('search') && $request->search != '') {
+            $query->where('name', 'like', '%' . $request->search . '%')
+                  ->orWhere('coach', 'like', '%' . $request->search . '%');
+        }
+
+        $teams = $query->withCount('players')->get();
+
+        return view('general.teams', compact('teams'));
+    }
 }

@@ -87,4 +87,65 @@ class StatistikController extends Controller
 
         return view('dashboard.statistik', compact('tournament', 'teams', 'players', 'teamId'));
     }
+
+    public function globalStats()
+    {
+        // 1. Player Statistics (Top 5 across all matches)
+        $topPlayers = Player::select(
+                'players.id',
+                'players.name as player_name',
+                'teams.name as team_name'
+            )
+            ->join('teams', 'players.teams_id', '=', 'teams.id')
+            ->withCount('playerStats as match_count')
+            ->selectRaw('ROUND(AVG(player_stats.point), 1) as avg_points')
+            ->selectRaw('ROUND(AVG(player_stats.ast), 1) as avg_assists')
+            ->selectRaw('ROUND(AVG(player_stats.orb + player_stats.drb), 1) as avg_rebounds')
+            ->selectRaw('ROUND(AVG(player_stats.blk), 1) as avg_blocks')
+            ->selectRaw('ROUND(AVG(player_stats.stl), 1) as avg_steals')
+            ->selectRaw('ROUND(AVG(player_stats.per), 1) as avg_per')
+            ->join('player_stats', 'players.id', '=', 'player_stats.players_id')
+            ->groupBy('players.id', 'players.name', 'teams.name')
+            ->havingRaw('COUNT(player_stats.id) > 0') // Only players who have played
+            ->get();
+
+        $topScorers = $topPlayers->sortByDesc('avg_points')->take(5);
+        $topAssists = $topPlayers->sortByDesc('avg_assists')->take(5);
+        $topRebounds = $topPlayers->sortByDesc('avg_rebounds')->take(5);
+        $topBlocks = $topPlayers->sortByDesc('avg_blocks')->take(5);
+        $topSteals = $topPlayers->sortByDesc('avg_steals')->take(5);
+        $topPer = $topPlayers->sortByDesc('avg_per')->take(5);
+
+        // 2. Team Statistics
+        // Calculating team averages based on their players' stats
+        $topTeams = Team::select('teams.id', 'teams.name')
+            ->join('players', 'teams.id', '=', 'players.teams_id')
+            ->join('player_stats', 'players.id', '=', 'player_stats.players_id')
+            ->selectRaw('ROUND(AVG(player_stats.point), 1) as avg_points')
+            ->selectRaw('ROUND(AVG(player_stats.ast), 1) as avg_assists')
+            ->selectRaw('ROUND(AVG(player_stats.orb + player_stats.drb), 1) as avg_rebounds')
+            ->selectRaw('ROUND(AVG(player_stats.blk), 1) as avg_blocks')
+            ->selectRaw('ROUND(AVG(player_stats.stl), 1) as avg_steals')
+            ->selectRaw('ROUND(AVG(player_stats.per), 1) as avg_per')
+            ->groupBy('teams.id', 'teams.name')
+            ->havingRaw('COUNT(player_stats.id) > 0')
+            ->orderByDesc('avg_per')
+            ->take(5)
+            ->get();
+
+
+        // 3. Tournament Statistics (General Overview)
+        $overviewStats = [
+            'total_tournaments' => Tournament::count(),
+            'active_tournaments' => Tournament::where('status', 'ongoing')->count(),
+            'total_teams' => Team::count(),
+            'total_players' => Player::count(),
+            'total_matches' => MatchResult::count(),
+        ];
+
+        return view('general.statistics', compact(
+            'topScorers', 'topAssists', 'topRebounds', 'topBlocks', 'topSteals', 'topPer',
+            'topTeams', 'overviewStats'
+        ));
+    }
 }
