@@ -101,7 +101,7 @@
                 <a class="{{ request()->routeIs('players.global') ? 'text-primary border-b-2 border-primary -mb-0.5 pb-0.5' : 'text-slate-300 hover:text-primary' }} transition-colors text-sm font-bold leading-normal relative" href="{{ route('players.global') }}">Players</a>
                 <a class="{{ request()->routeIs('statistics.global') ? 'text-primary border-b-2 border-primary -mb-0.5 pb-0.5' : 'text-slate-300 hover:text-primary' }} transition-colors text-sm font-bold leading-normal relative" href="{{ route('statistics.global') }}">Statistics</a>
                 @auth
-                    <a class="bg-primary/10 border border-primary/50 text-white hover:bg-primary hover:text-black transition-all text-[11px] font-black uppercase tracking-widest px-4 py-2 rounded-full shadow-[0_4px_15px_-5px_rgba(244,140,37,0.3)]" href="{{ route('tournament.mine') }}">
+                    <a class="{{ request()->routeIs('tournament.mine') ? 'bg-primary text-[#181411] shadow-[0_4px_15px_-5px_rgba(244,140,37,0.5)]' : 'bg-primary/10 text-white shadow-[0_4px_15px_-5px_rgba(244,140,37,0.3)]' }} hover:bg-primary hover:text-[#181411] border border-primary/50 transition-all text-[11px] font-black uppercase tracking-widest px-4 py-2 rounded-full" href="{{ route('tournament.mine') }}">
                         My Tourneys
                     </a>
                 @endauth
@@ -138,7 +138,7 @@
             <a class="text-slate-300 hover:text-primary transition-colors text-xs font-bold uppercase tracking-wider" href="{{ route('players.global') }}">Players</a>
             <a class="text-slate-300 hover:text-primary transition-colors text-xs font-bold uppercase tracking-wider" href="{{ route('statistics.global') }}">Stats</a>
             @auth
-                <a class="bg-primary/20 border border-primary/50 text-white px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider whitespace-nowrap" href="{{ route('tournament.mine') }}">My Tourneys</a>
+                <a class="{{ request()->routeIs('tournament.mine') ? 'bg-primary text-[#181411]' : 'bg-primary/20 text-white' }} border border-primary/50 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider whitespace-nowrap" href="{{ route('tournament.mine') }}">My Tourneys</a>
             @endauth
         </div>
     </header>
@@ -146,17 +146,11 @@
     <!-- Main Content Dynamic Injection -->
     @yield('content')
 
-    <!-- Footer -->
     <footer class="mt-auto border-t border-[#393028] bg-[#181411] py-8 w-full z-10">
-        <div class="container mx-auto px-6 lg:px-10 flex flex-col md:flex-row items-center justify-between gap-6">
-            <div class="flex items-center gap-3">
-                <img src="{{ asset('images/logo.png') }}" alt="Logo" class="size-8 object-contain opacity-50">
+        <div class="container mx-auto px-6 lg:px-10 flex flex-col items-center justify-center gap-6">
+            <div class="flex flex-col items-center gap-3">
+                <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-10 object-contain opacity-50">
                 <span class="text-slate-500 font-bold text-sm">© {{ date('Y') }} HOOP TOURNEY. All rights reserved.</span>
-            </div>
-            <div class="flex items-center gap-6">
-                <a href="#" class="text-slate-500 hover:text-[#f48c25] transition-colors text-sm font-medium">Terms</a>
-                <a href="#" class="text-slate-500 hover:text-[#f48c25] transition-colors text-sm font-medium">Privacy</a>
-                <a href="#" class="text-slate-500 hover:text-[#f48c25] transition-colors text-sm font-medium">Support</a>
             </div>
         </div>
     </footer>

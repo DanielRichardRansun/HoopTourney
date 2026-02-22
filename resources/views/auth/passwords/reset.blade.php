@@ -1,65 +1,70 @@
-@extends('layouts.app')
+@extends('layouts.general')
 
 @section('content')
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">{{ __('Reset Password') }}</div>
+<main class="flex-grow bg-[#181411] min-h-screen flex items-center justify-center font-['Lexend'] py-20 px-6 relative overflow-hidden">
+    
+    <!-- Background Decor -->
+    <div class="absolute inset-0 bg-gradient-to-b from-[#221914] to-[#181411] z-0"></div>
+    <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10 mix-blend-overlay z-0"></div>
+    <div class="absolute -top-32 -left-32 size-96 bg-[#f48c25] rounded-full blur-[150px] opacity-10 pointer-events-none z-0"></div>
 
-                <div class="card-body">
-                    <form method="POST" action="{{ route('password.update') }}">
-                        @csrf
+    <div class="glass-panel p-8 md:p-12 rounded-3xl border border-[#393028] w-full max-w-[450px] relative z-10 shadow-2xl">
+        <div class="text-center mb-8">
+            <div class="size-16 rounded-full bg-[#f48c25]/10 border border-[#f48c25]/30 flex items-center justify-center mx-auto mb-4">
+                <span class="material-symbols-outlined text-4xl text-[#f48c25]">lock_reset</span>
+            </div>
+            <h3 class="text-3xl font-black text-white italic uppercase tracking-tight">
+                New <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#f48c25] to-orange-300">Password</span>
+            </h3>
+            <p class="text-slate-400 mt-2 text-sm">Please create a new secure password for your account.</p>
+        </div>
 
-                        <input type="hidden" name="token" value="{{ $token }}">
+        <form method="POST" action="{{ route('password.update') }}" class="space-y-6">
+            @csrf
 
-                        <div class="row mb-3">
-                            <label for="email" class="col-md-4 col-form-label text-md-end">{{ __('Email Address') }}</label>
+            <input type="hidden" name="token" value="{{ $token }}">
 
-                            <div class="col-md-6">
-                                <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ $email ?? old('email') }}" required autocomplete="email" autofocus>
+            <!-- Email -->
+            <div>
+                <label class="block text-slate-300 text-sm font-bold mb-2 uppercase tracking-wide">Email Address</label>
+                <div class="relative">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-slate-500 text-[20px]">mail</span>
+                    <input type="email" name="email" class="w-full bg-[#221914] border border-[#393028] text-white rounded-xl pl-12 pr-4 py-3 outline-none focus:border-[#f48c25] transition-colors placeholder-slate-600 @error('email') border-red-500 @enderror" value="{{ $email ?? old('email') }}" placeholder="you@example.com" required autocomplete="email" autofocus>
+                </div>
+                @error('email')
+                    <p class="text-red-500 text-xs mt-2 italic flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">error</span>{{ $message }}</p>
+                @enderror
+            </div>
 
-                                @error('email')
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                                @enderror
-                            </div>
-                        </div>
+            <!-- Password -->
+            <div>
+                <label class="block text-slate-300 text-sm font-bold mb-2 uppercase tracking-wide">New Password</label>
+                <div class="relative">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-slate-500 text-[20px]">lock</span>
+                    <input type="password" name="password" class="w-full bg-[#221914] border border-[#393028] text-white rounded-xl pl-12 pr-4 py-3 outline-none focus:border-[#f48c25] transition-colors placeholder-slate-600 @error('password') border-red-500 @enderror" placeholder="••••••••" required autocomplete="new-password">
+                </div>
+                @error('password')
+                    <p class="text-red-500 text-xs mt-2 italic flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">error</span>{{ $message }}</p>
+                @enderror
+            </div>
 
-                        <div class="row mb-3">
-                            <label for="password" class="col-md-4 col-form-label text-md-end">{{ __('Password') }}</label>
-
-                            <div class="col-md-6">
-                                <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" name="password" required autocomplete="new-password">
-
-                                @error('password')
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <label for="password-confirm" class="col-md-4 col-form-label text-md-end">{{ __('Confirm Password') }}</label>
-
-                            <div class="col-md-6">
-                                <input id="password-confirm" type="password" class="form-control" name="password_confirmation" required autocomplete="new-password">
-                            </div>
-                        </div>
-
-                        <div class="row mb-0">
-                            <div class="col-md-6 offset-md-4">
-                                <button type="submit" class="btn btn-primary">
-                                    {{ __('Reset Password') }}
-                                </button>
-                            </div>
-                        </div>
-                    </form>
+            <!-- Confirm Password -->
+            <div>
+                <label class="block text-slate-300 text-sm font-bold mb-2 uppercase tracking-wide">Confirm Password</label>
+                <div class="relative">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-slate-500 text-[20px]">password</span>
+                    <input type="password" name="password_confirmation" class="w-full bg-[#221914] border border-[#393028] text-white rounded-xl pl-12 pr-4 py-3 outline-none focus:border-[#f48c25] transition-colors placeholder-slate-600" placeholder="••••••••" required autocomplete="new-password">
                 </div>
             </div>
-        </div>
+
+            <!-- Submit -->
+            <div class="pt-4">
+                <button type="submit" class="w-full py-3.5 bg-[#f48c25] text-[#181411] rounded-xl font-black uppercase tracking-wider transition-all hover:bg-orange-400 hover:shadow-[0_10px_20px_-10px_rgba(244,140,37,0.5)] flex items-center justify-center gap-2">
+                    Reset Password
+                    <span class="material-symbols-outlined text-[20px]">check_circle</span>
+                </button>
+            </div>
+        </form>
     </div>
-</div>
+</main>
 @endsection
