@@ -15,7 +15,7 @@ class BracketController extends Controller
         $tournament = Tournament::findOrFail($id);
         $schedules = Schedule::where('tournaments_id', $id)
             ->with('matchResult')
-            ->orderBy('round')
+            ->orderBy('id')
             ->get();
 
         if ($schedules->isEmpty()) {
@@ -37,15 +37,29 @@ class BracketController extends Controller
             $winnerId = $schedule->matchResult->winning_team_id ?? null;
 
             $bracket[$round][] = [
-                ['name' => $team1Name, 'is_winner' => $schedule->matchResult?->winning_team_id == $schedule->team1_id],
-                ['name' => $team2Name, 'is_winner' => $schedule->matchResult?->winning_team_id == $schedule->team2_id],
+                [
+                    'name' => $team1Name,
+                    'is_winner' => $schedule->matchResult?->winning_team_id == $schedule->team1_id,
+                    'score' => $schedule->matchResult?->team1_score ?? null,
+                    'logo' => $team1Model->logo ?? null
+                ],
+                [
+                    'name' => $team2Name,
+                    'is_winner' => $schedule->matchResult?->winning_team_id == $schedule->team2_id,
+                    'score' => $schedule->matchResult?->team2_score ?? null,
+                    'logo' => $team2Model->logo ?? null
+                ],
                 $schedule->id
             ];
 
 
             //camps
             if ($schedule->round == $schedules->max('round') && $winnerId) {
-                $champion = Team::find($winnerId)->name ?? 'TBD';
+                $winTeam = Team::find($winnerId);
+                $champion = (object)[
+                    'name' => $winTeam->name ?? 'TBD',
+                    'logo' => $winTeam->logo ?? null
+                ];
             }
         }
 

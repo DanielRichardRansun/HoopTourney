@@ -1,349 +1,351 @@
-@extends('layouts.app')
+@extends('layouts.app2')
+
+@section('title', 'My Team - ' . $team->name)
 
 @section('content')
-<style>
-    .team-card {
-        border: 2px solid #1e3c72;
-        border-radius: 10px;
-        padding: 20px;
-        background-color: #f8f9fa;
-        text-align: center;
-        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-    }
-    .team-title {
-        font-weight: bold;
-        background-color: #1e3c72;
-        color: white;
-        padding: 12px;
-        border-radius: 5px;
-        font-size: 1.5em;
-        margin-bottom: 15px;
-    }
-    .team-info {
-        font-size: 1.2em;
-        margin-bottom: 10px;
-    }
-    .player-table {
-        background-color: white;
-        border-radius: 10px;
-        overflow: hidden;
-        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-    }
-    .table thead {
-        background-color: #1e3c72 !important;
-        color: white;
-    }
-    .table th, .table td {
-        text-align: center;
-        vertical-align: middle;
-        padding: 12px;
-    }
-    .table thead th {
-    background-color: #1e3c72 !important;
-    color: white !important;
+@php
+    $playersData = $players->map(function($player, $index) {
+        return [
+            'original_index' => $index + 1,
+            'id' => $player->id,
+            'name' => $player->name,
+            'jersey_number' => (int)($player->jersey_number ?: 0),
+            'jersey_display' => $player->jersey_number ?: '-',
+            'position' => $player->position ?: '-',
+            'photo' => $player->photo,
+        ];
+    });
+@endphp
 
+<div class="space-y-8 max-w-5xl mx-auto" x-data="{
+    search: '',
+    sortField: 'jersey_number',
+    sortDirection: 'asc',
+    perPage: 10,
+    currentPage: 1,
+    players: {{ json_encode($playersData) }},
+    
+    get filteredPlayers() {
+        let filtered = this.players.filter(p => 
+            p.name.toLowerCase().includes(this.search.toLowerCase()) ||
+            p.position.toLowerCase().includes(this.search.toLowerCase())
+        );
+        
+        filtered.sort((a, b) => {
+            let modifier = this.sortDirection === 'asc' ? 1 : -1;
+            let valA = a[this.sortField];
+            let valB = b[this.sortField];
+            
+            if (typeof valA === 'string') {
+                return valA.localeCompare(valB) * modifier;
+            }
+            return (valA - valB) * modifier;
+        });
+        
+        return filtered;
+    },
 
-    .floating-form {
-        display: none;
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: white;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 0 20px rgba(0,0,0,0.2);
-        z-index: 1000;
-        width: 400px;
-        max-width: 90%;
-    }
-    
-    .form-overlay {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0,0,0,0.5);
-        z-index: 999;
-    }
-    
-    .form-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-    }
-    
-    .close-btn {
-        background: none;
-        border: none;
-        font-size: 1.5rem;
-        cursor: pointer;
-    }
-}
-</style>
+    get paginatedPlayers() {
+        let start = (this.currentPage - 1) * this.perPage;
+        return this.filteredPlayers.slice(start, start + this.perPage);
+    },
 
-<div class="container mt-5">
+    get totalPages() {
+        return Math.ceil(this.filteredPlayers.length / this.perPage);
+    },
+
+    sortBy(field) {
+        if (this.sortField === field) {
+            this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            this.sortField = field;
+            this.sortDirection = 'asc';
+        }
+        this.currentPage = 1;
+    }
+}">
+
+    <!-- Flash Messages -->
     @if (session('success'))
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        {{ session('success') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)"
+         class="glass-panel border-l-4 border-green-500 p-4 mb-6 flex justify-between items-center animate-fade-in-down">
+        <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-green-500">check_circle</span>
+            <p class="text-white font-bold">{{ session('success') }}</p>
+        </div>
+        <button @click="show = false" class="text-slate-400 hover:text-white transition-colors">
+            <span class="material-symbols-outlined">close</span>
+        </button>
     </div>
     @endif
 
+    <!-- Team Info Card -->
+    <div class="glass-panel border border-[#393028] rounded-2xl overflow-hidden shadow-2xl relative">
+        <div class="absolute top-0 right-0 p-8 pt-12 -mr-16 -mt-16 opacity-10">
+            <span class="material-symbols-outlined text-[160px] text-primary rotate-12">groups</span>
+        </div>
+        
+        <div class="p-8 md:p-10 relative z-10">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                <div>
+                    <h4 class="text-[10px] font-black text-primary uppercase tracking-[0.3em] mb-3">Team Information</h4>
+                    <h1 class="text-4xl md:text-5xl font-black text-white italic uppercase tracking-tight mb-2">
+                        {{ $team->name }}
+                    </h1>
+                    <div class="flex flex-wrap gap-6 mt-6">
+                        <div class="flex items-center gap-3">
+                            <div class="size-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-primary text-xl">person</span>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Coach</p>
+                                <p class="text-white font-black">{{ $team->coach ?: 'Not assigned' }}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="size-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-blue-400 text-xl">manage_accounts</span>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Manager</p>
+                                <p class="text-white font-black">{{ $team->manager ?: 'Not assigned' }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <button onclick="showEditTeamForm()" 
+                            class="px-8 py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-black font-black uppercase tracking-widest transition-all shadow-lg shadow-amber-500/20 active:scale-95 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-xl">edit</span>
+                        Edit Team
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <!-- Floating Forms (hidden by default) -->
+    <!-- Roster Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 pt-4">
+        <div>
+            <h2 class="text-3xl font-black text-white italic uppercase tracking-tight">Team Roster</h2>
+            <p class="text-slate-500 text-sm mt-1">Manage your players and their details</p>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="relative group">
+                <span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-slate-500 group-focus-within:text-primary transition-colors">search</span>
+                <input type="text" x-model="search" placeholder="Search roster..." 
+                       class="bg-[#1c1613] border border-[#393028] text-white pl-12 pr-4 py-2.5 rounded-xl text-sm focus:outline-none focus:border-primary transition-all w-64">
+            </div>
+            <button onclick="showAddPlayerForm()" 
+                    class="bg-green-500 hover:bg-green-600 text-black font-black uppercase tracking-widest px-6 py-2.5 rounded-xl transition-all shadow-lg shadow-green-500/20 active:scale-95 flex items-center gap-2 text-sm">
+                <span class="material-symbols-outlined text-xl">person_add</span>
+                Add Player
+            </button>
+        </div>
+    </div>
+
+    <!-- Players Table -->
+    <div class="glass-panel border border-[#393028] rounded-2xl overflow-hidden shadow-2xl">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b border-[#393028] bg-[#1c1613]/50">
+                        <th class="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">#</th>
+                        <th class="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest cursor-pointer group" @click="sortBy('name')">
+                            <div class="flex items-center gap-2">
+                                Name
+                                <span class="material-symbols-outlined text-sm text-slate-600 transition-transform" :class="sortField === 'name' ? (sortDirection === 'asc' ? '' : 'rotate-180') : ''">expand_more</span>
+                            </div>
+                        </th>
+                        <th class="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest cursor-pointer group text-center" @click="sortBy('jersey_number')">
+                            <div class="flex items-center justify-center gap-2">
+                                Jersey
+                                <span class="material-symbols-outlined text-sm text-slate-600 transition-transform" :class="sortField === 'jersey_number' ? (sortDirection === 'asc' ? '' : 'rotate-180') : ''">expand_more</span>
+                            </div>
+                        </th>
+                        <th class="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">Position</th>
+                        <th class="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-[#393028]/50">
+                    <template x-for="(player, index) in paginatedPlayers" :key="player.id">
+                        <tr class="hover:bg-white/[0.02] transition-colors group">
+                            <td class="px-6 py-4 text-slate-500 font-mono text-xs" x-text="(currentPage - 1) * perPage + index + 1"></td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="size-12 rounded-2xl bg-[#1c1613] border border-[#393028] flex items-center justify-center shrink-0 overflow-hidden relative group-hover:border-primary/50 transition-all shadow-lg">
+                                        <template x-if="player.photo">
+                                            <img :src="'/images/profiles/' + player.photo" :alt="player.name" class="w-full h-full object-cover">
+                                        </template>
+                                        <template x-if="!player.photo">
+                                            <span class="material-symbols-outlined text-slate-700 text-2xl group-hover:text-primary/50 transition-colors">person</span>
+                                        </template>
+                                    </div>
+                                    <span class="text-white font-bold group-hover:text-primary transition-colors" x-text="player.name"></span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="px-3 py-1 rounded-lg bg-[#221914] border border-[#393028] text-primary font-black tabular-nums" x-text="player.jersey_display"></span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="text-xs font-black uppercase tracking-widest text-slate-400 bg-white/5 px-3 py-1 rounded-full border border-white/5" x-text="player.position"></span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex justify-end gap-2">
+                                    <button @click="showEditForm(player.id, player.name, player.jersey_number, player.position)" 
+                                            class="p-2 rounded-lg bg-amber-500/10 text-amber-500 hover:bg-amber-500 hover:text-black transition-all">
+                                        <span class="material-symbols-outlined text-xl">edit</span>
+                                    </button>
+                                    <button @click="showDeleteConfirm(player.id, player.name)" 
+                                            class="p-2 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-black transition-all">
+                                        <span class="material-symbols-outlined text-xl">delete</span>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="p-6 bg-[#181411]/50 flex flex-col md:flex-row md:items-center justify-between gap-4 border-t border-[#393028]">
+            <p class="text-slate-500 text-xs font-bold uppercase tracking-widest">
+                Showing <span class="text-white" x-text="Math.min(filteredPlayers.length, (currentPage-1)*perPage + 1)"></span> to 
+                <span class="text-white" x-text="Math.min(filteredPlayers.length, currentPage * perPage)"></span> of 
+                <span class="text-white" x-text="filteredPlayers.length"></span> players
+            </p>
+            <div class="flex items-center gap-2">
+                <button @click="currentPage--" :disabled="currentPage === 1" 
+                        class="p-2 rounded-lg bg-[#221914] border border-[#393028] text-slate-400 hover:text-white disabled:opacity-30 disabled:hover:text-slate-400 transition-all">
+                    <span class="material-symbols-outlined">chevron_left</span>
+                </button>
+                <div class="flex items-center gap-1">
+                    <template x-for="page in totalPages" :key="page">
+                        <button @click="currentPage = page" 
+                                :class="currentPage === page ? 'bg-primary text-black' : 'bg-[#221914] text-slate-400 hover:text-white border border-[#393028]'"
+                                class="size-8 rounded-lg text-xs font-black transition-all" x-text="page"></button>
+                    </template>
+                </div>
+                <button @click="currentPage++" :disabled="currentPage === totalPages" 
+                        class="p-2 rounded-lg bg-[#221914] border border-[#393028] text-slate-400 hover:text-white disabled:opacity-30 disabled:hover:text-slate-400 transition-all">
+                    <span class="material-symbols-outlined">chevron_right</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    @if($players->isEmpty())
+    <div class="glass-panel border border-[#393028] rounded-2xl overflow-hidden shadow-xl mt-8">
+        <div class="py-16 flex flex-col items-center justify-center text-center">
+            <div class="size-20 rounded-full bg-[#221914] border border-[#393028] flex items-center justify-center mb-4">
+                <span class="material-symbols-outlined text-4xl text-slate-600">person_off</span>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-2">No Players Found</h3>
+            <p class="text-slate-500 max-w-sm">No players have been added to this team yet. Click "Add Player" to get started.</p>
+        </div>
+    </div>
+    @endif
+
+    <!-- Modals Overlay -->
+    <div id="formOverlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[999]" style="display: none;"></div>
+
+    <!-- Floating Forms -->
     @include('partials.edit-team-form')
     @include('partials.add-player-form')
     @include('partials.edit-player-form')
     @include('partials.delete-player-confirm')
 
-    <!-- Informasi Tim -->
-    <div class="team-card">
-        <div class="team-title">Informasi Tim</div>
-        <p class="team-info"><strong>Nama:</strong> {{ $team->name }}</p>
-        <p class="team-info"><strong>Coach:</strong> {{ $team->coach }}</p>
-        <p class="team-info"><strong>Manager:</strong> {{ $team->manager }}</p>
-        <button class="btn btn-warning btn-edit-team" onclick="showEditTeamForm()">Edit Tim</button>
-    </div>
-
-    <!-- Daftar Pemain -->
-    <div class="d-flex justify-content-between align-items-center mt-5">
-        <h3 class="text-center">Daftar Pemain</h3>
-        <button class="btn btn-success" onclick="showAddPlayerForm()">Tambah Pemain</button>
-    </div>
-    
-    <div class="table-responsive player-table mt-3">
-        <table id="playerTable" class="table table-bordered">
-            <thead> 
-                <tr>
-                    <th>#</th>
-                    <th>Nama</th>
-                    <th>No. Punggung</th>
-                    <th>Posisi</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($players as $index => $player)
-                    <tr>
-                        <td>{{ $index + 1 }}</td>
-                        <td>{{ $player->name }}</td>
-                        <td>{{ $player->jersey_number }}</td>
-                        <td>{{ $player->position }}</td>
-                        <td>
-                            <button class="btn btn-warning btn-sm" onclick="showEditForm({{ $player->id }}, '{{ $player->name }}', {{ $player->jersey_number }}, '{{ $player->position }}')">Edit</button>
-                            <button class="btn btn-danger btn-sm" onclick="showDeleteConfirm({{ $player->id }}, '{{ $player->name }}')">Hapus</button>
-                        </td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </div>
-
-    @if($players->isEmpty())
-        <p class="text-center text-muted mt-4">Belum ada pemain dalam tim ini.</p>
-    @endif
 </div>
+@endsection
 
+@push('styles')
 <style>
-    .floating-form {
-        display: none;
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: white;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 0 20px rgba(0,0,0,0.2);
-        z-index: 1000;
-        width: 400px;
-        max-width: 90%;
+    .glass-panel {
+        background: rgba(24, 20, 17, 0.7);
+        backdrop-filter: blur(12px);
     }
-    
-    .form-overlay {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0,0,0,0.5);
-        z-index: 999;
+    @keyframes fade-in-down {
+        0% { opacity: 0; transform: translateY(-10px); }
+        100% { opacity: 1; transform: translateY(0); }
     }
-    
-    .form-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-    }
-    
-    .close-btn {
-        background: none;
-        border: none;
-        font-size: 1.5rem;
-        cursor: pointer;
+    .animate-fade-in-down {
+        animation: fade-in-down 0.5s ease-out;
     }
 </style>
+@endpush
 
-<!-- JavaScript untuk mengontrol form -->
+@push('scripts')
 <script>
-    // Fungsi untuk menampilkan form edit tim
+    // Bridge functions from Alpine to legacy partials if needed, 
+    // though the partials should ideally be updated too.
+    // For now, keeping the global functions they expect.
+
     function showEditTeamForm() {
         document.getElementById('editTeamForm').style.display = 'block';
         document.getElementById('formOverlay').style.display = 'block';
     }
     
-    // Fungsi untuk menampilkan form tambah pemain
     function showAddPlayerForm() {
         document.getElementById('addPlayerForm').style.display = 'block';
         document.getElementById('formOverlay').style.display = 'block';
     }
-    
-    // Handle form edit player submission
-const editForm = document.getElementById('editPlayerFormAction');
-if (editForm) {
-    editForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        fetch(this.action, {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                _method: 'PUT',
-                name: document.getElementById('edit_player_name').value,
-                jersey_number: document.getElementById('edit_jersey_number').value,
-                position: document.getElementById('edit_position').value
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert(data.message);
-                location.reload();
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Terjadi kesalahan saat mengupdate data');
-        });
-    });
-}
 
-// Handle form delete player submission
-const deleteForm = document.getElementById('deletePlayerForm');
-if (deleteForm) {
-    deleteForm.addEventListener('submit', function(e) {
-        e.preventDefault();
+    function showEditForm(id, name, jersey, position) {
+        document.getElementById('edit_player_id').value = id;
+        document.getElementById('edit_player_name').value = name;
+        document.getElementById('edit_jersey_number').value = jersey;
+        document.getElementById('edit_position').value = position;
         
-        fetch(this.action, {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                _method: 'DELETE'
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert(data.message);
-                location.reload();
-            } else {
-                alert(data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Terjadi kesalahan saat menghapus data');
-        });
-    });
-}
-    
-    // Fungsi untuk menutup semua form
+        // Update form action URL
+        const form = document.getElementById('editPlayerFormAction');
+        form.action = `/players/${id}`;
+        form.dataset.playerId = id;
+        
+        document.getElementById('editPlayerForm').style.display = 'block';
+        document.getElementById('formOverlay').style.display = 'block';
+    }
+
+    function showDeleteConfirm(id, name) {
+        document.getElementById('delete_player_name').textContent = name;
+        
+        // Update form action URL
+        const form = document.getElementById('deletePlayerForm');
+        form.action = `/players/${id}`;
+        form.dataset.playerId = id;
+        
+        document.getElementById('deletePlayerConfirm').style.display = 'block';
+        document.getElementById('formOverlay').style.display = 'block';
+    }
+
     function closeAllForms() {
         document.querySelectorAll('.floating-form').forEach(form => {
             form.style.display = 'none';
         });
         document.getElementById('formOverlay').style.display = 'none';
     }
-    
-    // Event listener untuk form submission
-    document.addEventListener('DOMContentLoaded', function() {
-        // Tutup form ketika mengklik overlay
-        document.getElementById('formOverlay').addEventListener('click', closeAllForms);
-        
-        // Handle form edit player submission
-        const editForm = document.getElementById('editPlayerFormAction');
-if (editForm) {
-    editForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const form = this;
-        const formData = new FormData(form);
-        const playerId = form.dataset.playerId; // Pastikan ada data attribute ini di form
-        
-        fetch(`/players/${playerId}`, {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                'Accept': 'application/json',
-                'X-HTTP-Method-Override': 'PUT' // Gunakan ini untuk override method
-            },
-            body: formData
-        })
-        .then(handleResponse)
-        .catch(handleError);
-    });
-}
-        
-        // Handle form delete player submission
-        const deleteForm = document.getElementById('deletePlayerForm');
-if (deleteForm) {
-    deleteForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const form = this;
-        const playerId = form.dataset.playerId; // Pastikan ada data attribute ini di form
-        
-        fetch(`/players/${playerId}`, {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                'Accept': 'application/json',
-                'X-HTTP-Method-Override': 'DELETE'
-            }
-        })
-        .then(handleResponse)
-        .catch(handleError);
-    });
-}
-        
-        // Tutup form ketika tombol close diklik
-        document.querySelectorAll('.close-btn').forEach(btn => {
-            btn.addEventListener('click', closeAllForms);
-        });
-    });
-</script>
 
-<!-- DataTables Scripts -->
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-<script>
-    $(document).ready(function() {
-        $('#playerTable').DataTable();
+    // Modal close listeners
+    document.addEventListener('DOMContentLoaded', function() {
+        const overlay = document.getElementById('formOverlay');
+        if (overlay) overlay.addEventListener('click', closeAllForms);
     });
+
+    // Handle AJAX responses (legacy logic preservation)
+    function handleResponse(response) {
+        return response.json().then(data => {
+            if (data.success) {
+                alert(data.message);
+                location.reload();
+            } else {
+                alert(data.message || 'Error occurred');
+            }
+        });
+    }
+
+    function handleError(error) {
+        console.error('Error:', error);
+        alert('An error occurred during the request.');
+    }
 </script>
-@endsection
+@endpush

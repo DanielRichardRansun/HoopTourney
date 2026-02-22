@@ -11,6 +11,7 @@ class Player extends Model
         'jersey_number',
         'position',
         'teams_id',
+        'photo',
     ];
     // Relasi ke Tournament
     public function tournament()

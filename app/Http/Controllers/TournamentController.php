@@ -96,7 +96,79 @@ class TournamentController extends Controller
     public function detail($id)
     {
         $tournament = Tournament::findOrFail($id);
-        return view('tournaments.detail', compact('tournament'));
+
+        // --- Overview Stats ---
+        $teams = $tournament->teams()->with('players')->get();
+        $totalTeams = $teams->count();
+        $totalPlayers = $teams->sum(fn($t) => $t->players->count());
+
+        // Schedules for this tournament
+        $schedules = \App\Models\Schedule::where('tournaments_id', $id)
+            ->with(['team1', 'team2', 'matchResult'])
+            ->orderBy('date', 'asc')
+            ->get();
+
+        $totalMatches = $schedules->count();
+        $matchesCompleted = $schedules->filter(fn($s) => $s->status === 'completed')->count();
+        $matchesRemaining = $totalMatches - $matchesCompleted;
+
+        // --- Next Match Logic ---
+        $allMatchesCompleted = ($totalMatches > 0 && $matchesRemaining === 0);
+        $nextMatch = null;
+        if (!$allMatchesCompleted && $totalMatches > 0) {
+            // Find first schedule that hasn't ended, ordered by date
+            $nextMatch = $schedules->firstWhere('status', '!=', 'end');
+            // If all are not ended (none started), just show first match
+            if (!$nextMatch) {
+                $nextMatch = $schedules->first();
+            }
+        }
+
+        // --- Top 3 Teams (by wins) ---
+        $teamIds = $teams->pluck('id');
+        $topTeams = \App\Models\MatchResult::whereIn('winning_team_id', $teamIds)
+            ->whereHas('schedule', fn($q) => $q->where('tournaments_id', $id))
+            ->select('winning_team_id', \DB::raw('COUNT(*) as wins'))
+            ->groupBy('winning_team_id')
+            ->orderByDesc('wins')
+            ->take(3)
+            ->get()
+            ->map(function($item) {
+                $team = \App\Models\Team::find($item->winning_team_id);
+                return (object)[
+                    'name' => $team->name ?? 'Unknown',
+                    'logo' => $team->logo ?? null,
+                    'wins' => $item->wins,
+                ];
+            });
+
+        // --- Top 3 Players (by best average PER) ---
+        $matchResultIds = $schedules->pluck('matchResult.id')->filter();
+        $topPlayers = collect();
+        if ($matchResultIds->isNotEmpty()) {
+            $topPlayers = \App\Models\PlayerStat::whereIn('match_results_id', $matchResultIds)
+                ->select('players_id', \DB::raw('ROUND(AVG(per), 1) as avg_per'))
+                ->groupBy('players_id')
+                ->orderByDesc('avg_per')
+                ->take(3)
+                ->get()
+                ->map(function($item) {
+                    $player = \App\Models\Player::with('team')->find($item->players_id);
+                    return (object)[
+                        'name' => $player->name ?? 'Unknown',
+                        'team_name' => $player->team->name ?? '-',
+                        'team_logo' => $player->team->logo ?? null,
+                        'avg_per' => $item->avg_per,
+                    ];
+                });
+        }
+
+        return view('tournaments.detail', compact(
+            'tournament', 'totalTeams', 'totalPlayers',
+            'totalMatches', 'matchesCompleted', 'matchesRemaining',
+            'allMatchesCompleted', 'nextMatch',
+            'topTeams', 'topPlayers'
+        ));
     }
 
 
