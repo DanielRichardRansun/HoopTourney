@@ -40,6 +40,7 @@ class DatabaseSeeder extends Seeder
                 'start_date' => Carbon::now()->subYears(2)->subDays(10)->toDateString(),
                 'end_date' => Carbon::now()->subYears(2)->addDays(5)->toDateString(),
                 'status' => 'completed',
+                'logo' => 'logo (1).gif'
             ],
             [
                 'name' => 'Surabaya Student Basketball League 2025',
@@ -48,6 +49,7 @@ class DatabaseSeeder extends Seeder
                 'start_date' => Carbon::now()->subYears(1)->subDays(15)->toDateString(),
                 'end_date' => Carbon::now()->subYears(1)->addDays(5)->toDateString(),
                 'status' => 'completed',
+                'logo' => 'logo (2).gif'
             ],
             [
                 'name' => 'ClassMeeting SMAN 1 Basketball Edition',
@@ -56,6 +58,7 @@ class DatabaseSeeder extends Seeder
                 'start_date' => Carbon::now()->subMonths(6)->subDays(2)->toDateString(),
                 'end_date' => Carbon::now()->subMonths(6)->addDays(2)->toDateString(),
                 'status' => 'completed',
+                'logo' => 'logo (3).gif'
             ],
             [
                 'name' => 'Night Soldier East Java Challenge Series I',
@@ -64,6 +67,16 @@ class DatabaseSeeder extends Seeder
                 'start_date' => Carbon::now()->addDays(5)->toDateString(), // Upcoming
                 'end_date' => Carbon::now()->addDays(15)->toDateString(),
                 'status' => 'upcoming',
+                'logo' => 'logo (4).gif'
+            ],
+            [
+                'name' => 'National Basketball Championship 2026',
+                'organizer' => 'Perbasi Indonesia',
+                'description' => 'Kejuaraan basket tingkat nasional seri pembuka tahun 2026 yang diikuti oleh tim-tim elit.',
+                'start_date' => Carbon::now()->subDays(3)->toDateString(),
+                'end_date' => Carbon::now()->addDays(12)->toDateString(),
+                'status' => 'ongoing',
+                'logo' => 'logo.png'
             ]
         ];
 
@@ -100,6 +113,13 @@ class DatabaseSeeder extends Seeder
                 ['name' => 'Malang Ballers', 'coach' => 'Joko D', 'manager' => 'Nina'],
                 ['name' => 'Sidoarjo Swish', 'coach' => 'Bambang', 'manager' => 'Rini'],
                 ['name' => 'Gresik Dunkers', 'coach' => 'Slamet', 'manager' => 'Tono']
+            ],
+            // National (4 Teams - Ongoing)
+            [
+                ['name' => 'Satria Muda Jakarta', 'coach' => 'Youbel S', 'manager' => 'Rony'],
+                ['name' => 'Pelita Jaya Bakrie', 'coach' => 'Djordje J', 'manager' => 'Fictor'],
+                ['name' => 'Prawira Bandung', 'coach' => 'David S', 'manager' => 'Andre'],
+                ['name' => 'Dewas United Banten', 'coach' => 'Santiago R', 'manager' => 'Leo']
             ]
         ];
 
@@ -114,6 +134,7 @@ class DatabaseSeeder extends Seeder
                 'end_date' => $tData['end_date'],
                 'status' => $tData['status'],
                 'users_id' => $admin->id,
+                'logo' => $tData['logo'],
             ]);
 
             $tournamentTeams = [];

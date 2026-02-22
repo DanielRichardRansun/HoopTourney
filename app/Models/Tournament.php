@@ -18,7 +18,8 @@ class Tournament extends Model
         'start_date',
         'end_date',
         'status',
-        'users_id'
+        'users_id',
+        'logo'
     ];
     public function teams()
     {
