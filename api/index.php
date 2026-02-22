@@ -4,6 +4,10 @@ use Illuminate\Http\Request;
 
 define('LARAVEL_START', microtime(true));
 
+// Hindari pesan Deprecated merusak output tampilan/headers di Vercel (khususnya untuk PHP 8.4)
+error_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT);
+ini_set('display_errors', '0');
+
 // ──────────────────────────────────────────────────────────────
 // Vercel Serverless Bootstrap for Laravel 11
 // ──────────────────────────────────────────────────────────────
