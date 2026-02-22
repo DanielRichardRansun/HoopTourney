@@ -21,6 +21,13 @@ class AppServiceProvider extends ServiceProvider
     {
         if ($this->app->environment('production')) {
             \Illuminate\Support\Facades\URL::forceScheme('https');
+
+            // Vercel / Serverless Fix: Redirect paths to /tmp since the filesystem is read-only
+            $viewPath = '/tmp/framework/views';
+            if (!is_dir($viewPath)) {
+                mkdir($viewPath, 0755, true);
+            }
+            config(['view.compiled' => $viewPath]);
         }
     }
 }
