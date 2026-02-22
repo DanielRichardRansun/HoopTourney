@@ -10,11 +10,11 @@
     "routes": [
         {
             "src": "/build/(.*)",
-            "dest": "/public/build/$1"
+            "dest": "/build/$1"
         },
         {
-            "src": "/(css|js|images|storage|favicon.ico|robots.txt)/(.*)",
-            "dest": "/public/$1/$2"
+            "src": "/(css|js|images|storage|favicon\\.ico|robots\\.txt|manifest\\.json|sw\\.js)(.*)",
+            "dest": "/$1$2"
         },
         {
             "src": "/(.*)",
@@ -23,7 +23,14 @@
     ],
     "env": {
         "APP_ENV": "production",
-        "APP_DEBUG": "false",
+        "APP_DEBUG": "true",
+        "APP_URL": "https://hoop-tourney.vercel.app",
+        "APP_CONFIG_CACHE": "/tmp/config.php",
+        "APP_SERVICES_CACHE": "/tmp/services.php",
+        "APP_PACKAGES_CACHE": "/tmp/packages.php",
+        "APP_ROUTES_CACHE": "/tmp/routes.php",
+        "APP_EVENTS_CACHE": "/tmp/events.php",
+        "VIEW_COMPILED_PATH": "/tmp/storage/framework/views",
         "LOG_CHANNEL": "stderr",
         "SESSION_DRIVER": "cookie",
         "CACHE_STORE": "array",
