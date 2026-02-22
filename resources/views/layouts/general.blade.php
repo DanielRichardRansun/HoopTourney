@@ -12,7 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
     
     <!-- Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
     <!-- Tailwind CSS -->
@@ -82,6 +82,16 @@
         .bronze-row {
             background: linear-gradient(90deg, rgba(205, 127, 50, 0.1) 0%, rgba(34, 25, 20, 0) 100%);
             border-left: 4px solid #CD7F32;
+        }
+
+        /* Prevent Icon Text Flash (FOUC) */
+        .material-symbols-outlined {
+            display: inline-block;
+            width: 1em;
+            height: 1em;
+            overflow: hidden;
+            white-space: nowrap;
+            font-display: block;
         }
     </style>
 </head>
