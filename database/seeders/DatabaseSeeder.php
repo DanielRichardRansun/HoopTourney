@@ -76,7 +76,7 @@ class DatabaseSeeder extends Seeder
                 'start_date' => Carbon::now()->subDays(3)->toDateString(),
                 'end_date' => Carbon::now()->addDays(12)->toDateString(),
                 'status' => 'ongoing',
-                'logo' => 'logo.png'
+                'logo' => 'logo (5).gif'
             ]
         ];
 
