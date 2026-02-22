@@ -6,34 +6,33 @@ use Illuminate\Contracts\Http\Kernel;
 define('LARAVEL_START', microtime(true));
 
 try {
-    // Check if APP_KEY is set (Vercel Env Var)
-    if (empty(getenv('APP_KEY')) && empty($_ENV['APP_KEY'])) {
-        throw new Exception("APP_KEY is not set in Vercel Environment Variables.");
-    }
-
-    // Register the Composer autoloader...
-    require __DIR__.'/../vendor/autoload.php';
-
-    // Bootstrap Laravel...
-    $app = require_once __DIR__.'/../bootstrap/app.php';
-
-    // Vercel / Serverless Fix: Force storage to /tmp
-    $app->useStoragePath('/tmp/storage');
-    
-    // Ensure necessary directories exist in /tmp
-    $dirs = [
-        '/tmp/storage/framework/views',
-        '/tmp/storage/framework/cache',
-        '/tmp/storage/framework/sessions',
-        '/tmp/storage/logs',
+    // 1. Clear boot cache if it exists (leaked from local)
+    $cacheFiles = [
+        __DIR__.'/../bootstrap/cache/services.php',
+        __DIR__.'/../bootstrap/cache/packages.php',
+        __DIR__.'/../bootstrap/cache/config.php',
     ];
-    foreach ($dirs as $dir) {
-        if (!is_dir($dir)) {
-            @mkdir($dir, 0755, true);
+    foreach ($cacheFiles as $file) {
+        if (file_exists($file)) {
+            @unlink($file);
         }
     }
 
-    // Handle the request directly using the Kernel to see the true exception
+    // 2. Register the Composer autoloader...
+    require __DIR__.'/../vendor/autoload.php';
+
+    // 3. Bootstrap Laravel...
+    $app = require_once __DIR__.'/../bootstrap/app.php';
+
+    // 4. Serverless Fixes
+    $app->useStoragePath('/tmp/storage');
+    $dirs = ['/tmp/storage/framework/views', '/tmp/storage/framework/cache', '/tmp/storage/framework/sessions', '/tmp/storage/logs'];
+    foreach ($dirs as $dir) { if (!is_dir($dir)) { @mkdir($dir, 0755, true); } }
+
+    // 5. MANUALLY BOOT for debugging
+    $app->boot();
+
+    // 6. Handle the request
     $kernel = $app->make(Kernel::class);
     $request = Request::capture();
     $response = $kernel->handle($request);
@@ -58,13 +57,16 @@ try {
     echo "<pre style='overflow: auto; white-space: pre-wrap;'>" . htmlspecialchars($e->getTraceAsString()) . "</pre>";
     echo "</div>";
 
-    echo "<div style='margin-top: 2rem; border-top: 1px dashed #feb2b2; padding-top: 1rem;'>";
-    echo "<h4>Environment Check:</h4>";
-    echo "<ul>";
-    echo "<li><strong>PHP Version:</strong> " . PHP_VERSION . "</li>";
-    echo "<li><strong>APP_KEY set?</strong> " . (empty(getenv('APP_KEY')) ? 'No' : 'Yes (starts with ' . substr(getenv('APP_KEY'), 0, 10) . '...)') . "</li>";
-    echo "<li><strong>APP_ENV:</strong> " . getenv('APP_ENV') . "</li>";
-    echo "</ul>";
-    echo "</div>";
+    if (isset($app)) {
+        echo "<div style='margin-top: 2rem; border-top: 1px dashed #feb2b2; padding-top: 1rem;'>";
+        echo "<h4>Container State:</h4>";
+        echo "<ul>";
+        echo "<li><strong>View Bound?</strong> " . ($app->bound('view') ? 'Yes' : 'No') . "</li>";
+        echo "<li><strong>Config Bound?</strong> " . ($app->bound('config') ? 'Yes' : 'No') . "</li>";
+        echo "<li><strong>Loaded Providers:</strong> " . count($app->getLoadedProviders()) . "</li>";
+        echo "</ul>";
+        echo "</div>";
+    }
+    
     echo "</body></html>";
 }
