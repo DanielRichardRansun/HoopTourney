@@ -38,7 +38,7 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
             @forelse($tournaments as $tournament)
-                <div class="flex flex-col glass-panel rounded-2xl p-5 hover:bg-[#2c221c] transition-all hover:-translate-y-1 cursor-pointer group border-t-4 {{ $tournament->status == 'ongoing' ? 'border-t-red-500' : ($tournament->status == 'upcoming' ? 'border-t-emerald-500' : ($tournament->status == 'scheduled' ? 'border-t-blue-500' : 'border-t-slate-500')) }} shadow-xl relative overflow-hidden"
+                <div class="flex flex-col glass-panel rounded-2xl p-5 hover:bg-[#2c221c] transition-all hover:-translate-y-1 cursor-pointer group border-t-4 {{ $tournament->status == 'ongoing' ? 'border-t-emerald-500' : ($tournament->status == 'upcoming' ? 'border-t-emerald-500' : ($tournament->status == 'scheduled' ? 'border-t-blue-500' : 'border-t-slate-500')) }} shadow-xl relative overflow-hidden"
                      onclick="window.location='{{ route('tournament.detail', $tournament->id) }}'">
                     
                     <!-- Background aesthetic for role -->
@@ -67,7 +67,7 @@
                                 @php
                                     $statusClass = 'bg-slate-700/50 text-slate-300';
                                     $statusIcon = 'radio_button_unchecked';
-                                    if($tournament->status == 'ongoing') { $statusClass = 'bg-red-500/20 text-red-500 border border-red-500/30'; $statusIcon = 'radio_button_checked'; }
+                                    if($tournament->status == 'ongoing') { $statusClass = 'bg-emerald-500/20 text-emerald-500 border border-emerald-500/30'; $statusIcon = 'radio_button_checked'; }
                                     elseif($tournament->status == 'upcoming') { $statusClass = 'bg-emerald-500/20 text-emerald-500 border border-emerald-500/30'; $statusIcon = 'event_upcoming'; }
                                     elseif($tournament->status == 'scheduled') { $statusClass = 'bg-blue-500/20 text-blue-500 border border-blue-500/30'; $statusIcon = 'calendar_month'; }
                                     elseif($tournament->status == 'completed') { $statusClass = 'bg-slate-800 text-slate-400 border border-slate-700'; $statusIcon = 'check_circle'; }

@@ -59,7 +59,7 @@
                 <!-- Tournament Cards -->
                 <div class="flex overflow-x-auto pb-4 gap-6 scrollbar-hide snap-x">
                     @forelse($tournaments as $tournament)
-                        <div class="min-w-[320px] max-w-[400px] flex-1 glass-panel rounded-2xl p-5 hover:bg-[#2c221c] transition-all hover:-translate-y-1 cursor-pointer group snap-center border-l-4 {{ $tournament->status == 'ongoing' ? 'border-l-primary' : 'border-l-slate-700' }}"
+                        <div class="min-w-[320px] max-w-[400px] flex-1 glass-panel rounded-2xl p-5 hover:bg-[#2c221c] transition-all hover:-translate-y-1 cursor-pointer group snap-center border-l-4 {{ $tournament->status == 'ongoing' ? 'border-l-emerald-500' : 'border-l-slate-700' }}"
                              onclick="window.location='{{ route('tournament.detail', $tournament->id) }}'">
                             
                             <div class="flex items-center gap-4 mb-4">
@@ -80,13 +80,13 @@
                                     <div class="flex items-center justify-between w-full">
                                         @php
                                             $statusClass = 'bg-slate-700/50 text-slate-300';
-                                            if($tournament->status == 'ongoing') $statusClass = 'bg-red-500/20 text-red-500';
+                                            if($tournament->status == 'ongoing') $statusClass = 'bg-emerald-500/20 text-emerald-500';
                                             elseif($tournament->status == 'upcoming') $statusClass = 'bg-primary/20 text-primary';
                                             elseif($tournament->status == 'completed') $statusClass = 'bg-slate-800 text-slate-400';
                                         @endphp
                                         <span class="{{ $statusClass }} text-[10px] font-bold px-2 py-0.5 rounded uppercase flex items-center gap-1 w-fit">
                                             @if($tournament->status == 'ongoing')
-                                                <span class="size-1.5 rounded-full bg-red-500 animate-pulse"></span>
+                                                <span class="size-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                                             @endif
                                             {{ ucfirst($tournament->status) }}
                                         </span>

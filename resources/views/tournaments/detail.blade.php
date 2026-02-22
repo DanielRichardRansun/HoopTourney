@@ -208,7 +208,7 @@
                     $statusClass = 'bg-slate-700/20 text-slate-400 border-slate-700/50';
                     $statusIcon = 'radio_button_unchecked';
                     $statusGlow = '';
-                    if($tournament->status == 'ongoing') { $statusClass = 'bg-red-500/20 text-red-500 border-red-500/50'; $statusIcon = 'radio_button_checked'; $statusGlow = 'shadow-[0_0_15px_rgba(239,68,68,0.2)]'; }
+                    if($tournament->status == 'ongoing') { $statusClass = 'bg-emerald-500/20 text-emerald-500 border-emerald-500/50'; $statusIcon = 'radio_button_checked'; $statusGlow = 'shadow-[0_0_15px_rgba(16,185,129,0.2)]'; }
                     elseif($tournament->status == 'upcoming') { $statusClass = 'bg-emerald-500/20 text-emerald-500 border-emerald-500/50'; $statusIcon = 'event_upcoming'; }
                     elseif($tournament->status == 'scheduled') { $statusClass = 'bg-blue-500/20 text-blue-500 border-blue-500/50'; $statusIcon = 'calendar_month'; }
                     elseif($tournament->status == 'completed') { $statusClass = 'bg-slate-800 text-slate-500 border-slate-700'; $statusIcon = 'check_circle'; }

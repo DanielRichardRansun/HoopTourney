@@ -66,8 +66,8 @@
                             @endif
                         </div>
                         @if ($tournament->status == 'ongoing')
-                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-500/10 text-red-500 text-xs font-bold border border-red-500/20">
-                                <span class="size-2 rounded-full bg-red-500 animate-pulse"></span>
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-500 text-xs font-bold border border-emerald-500/20">
+                                <span class="size-2 rounded-full bg-emerald-500 animate-pulse"></span>
                                 LIVE
                             </span>
                         @elseif ($tournament->status == 'upcoming')
