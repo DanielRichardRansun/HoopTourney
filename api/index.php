@@ -1,43 +1,34 @@
 <?php
 
 use Illuminate\Http\Request;
-use Illuminate\Contracts\Http\Kernel;
 
 define('LARAVEL_START', microtime(true));
 
-try {
-    // 1. Clear boot cache if it exists (leaked from local)
-    $cacheFiles = [
-        __DIR__.'/../bootstrap/cache/services.php',
-        __DIR__.'/../bootstrap/cache/packages.php',
-        __DIR__.'/../bootstrap/cache/config.php',
-    ];
-    foreach ($cacheFiles as $file) {
-        if (file_exists($file)) {
-            @unlink($file);
-        }
-    }
+// 1. Error Reporting
+error_reporting(E_ALL);
+ini_set('display_errors', '1');
 
+try {
     // 2. Register the Composer autoloader...
     require __DIR__.'/../vendor/autoload.php';
 
     // 3. Bootstrap Laravel...
     $app = require_once __DIR__.'/../bootstrap/app.php';
 
-    // 4. Serverless Fixes
-    $app->useStoragePath('/tmp/storage');
-    $dirs = ['/tmp/storage/framework/views', '/tmp/storage/framework/cache', '/tmp/storage/framework/sessions', '/tmp/storage/logs'];
-    foreach ($dirs as $dir) { if (!is_dir($dir)) { @mkdir($dir, 0755, true); } }
+    // 4. Vercel / Serverless Fix: Force storage to /tmp
+    // This is the most crucial part for serverless environments
+    $storagePath = '/tmp/storage';
+    if (!is_dir($storagePath)) {
+        mkdir($storagePath, 0755, true);
+        mkdir($storagePath . '/framework/views', 0755, true);
+        mkdir($storagePath . '/framework/cache', 0755, true);
+        mkdir($storagePath . '/framework/sessions', 0755, true);
+        mkdir($storagePath . '/logs', 0755, true);
+    }
+    $app->useStoragePath($storagePath);
 
-    // 5. MANUALLY BOOT for debugging
-    $app->boot();
-
-    // 6. Handle the request
-    $kernel = $app->make(Kernel::class);
-    $request = Request::capture();
-    $response = $kernel->handle($request);
-    $response->send();
-    $kernel->terminate($request, $response);
+    // 5. Handle the request (Kernel will handle the boot properly)
+    $app->handleRequest(Request::capture());
 
 } catch (Throwable $e) {
     // Output error to stderr for Vercel logs and display on screen
@@ -56,17 +47,5 @@ try {
     echo "<h3>Stack Trace:</h3>";
     echo "<pre style='overflow: auto; white-space: pre-wrap;'>" . htmlspecialchars($e->getTraceAsString()) . "</pre>";
     echo "</div>";
-
-    if (isset($app)) {
-        echo "<div style='margin-top: 2rem; border-top: 1px dashed #feb2b2; padding-top: 1rem;'>";
-        echo "<h4>Container State:</h4>";
-        echo "<ul>";
-        echo "<li><strong>View Bound?</strong> " . ($app->bound('view') ? 'Yes' : 'No') . "</li>";
-        echo "<li><strong>Config Bound?</strong> " . ($app->bound('config') ? 'Yes' : 'No') . "</li>";
-        echo "<li><strong>Loaded Providers:</strong> " . count($app->getLoadedProviders()) . "</li>";
-        echo "</ul>";
-        echo "</div>";
-    }
-    
     echo "</body></html>";
 }
