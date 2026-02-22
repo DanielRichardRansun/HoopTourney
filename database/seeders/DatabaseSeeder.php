@@ -120,6 +120,8 @@ class DatabaseSeeder extends Seeder
 
             // Create Teams for this Tournament
             foreach ($teamsByTournament[$index] as $tIndex => $teamData) {
+                // Randomly assign logo from logo (1).gif to logo (34).gif
+                $teamData['logo'] = 'logo (' . rand(1, 34) . ').gif';
                 $team = Team::create($teamData);
                 $tournamentTeams[] = $team;
 
@@ -153,6 +155,8 @@ class DatabaseSeeder extends Seeder
                         'jersey_number' => array_rand(array_flip([0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 13, 15, 23, 24, 33, 34, 44, 55, 77, 99])),
                         'position' => $positions[$p],
                         'teams_id' => $team->id,
+                        // Randomly assign photo from profile (1).jpg to profile (46).jpg
+                        'photo' => 'profile (' . rand(1, 46) . ').jpg',
                     ]);
                 }
             }
