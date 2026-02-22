@@ -35,7 +35,12 @@ class TournamentController extends Controller
         }
 
         $tournaments = $query
-            ->orderByRaw("FIELD(status, 'upcoming','scheduled', 'ongoing', 'completed')")
+            ->orderByRaw("CASE 
+                WHEN status = 'upcoming' THEN 1 
+                WHEN status = 'scheduled' THEN 2 
+                WHEN status = 'ongoing' THEN 3 
+                WHEN status = 'completed' THEN 4 
+                ELSE 5 END")
             ->get();
 
         return view('welcome', compact('tournaments'));
@@ -65,7 +70,12 @@ class TournamentController extends Controller
         }
 
         $tournaments = $query
-            ->orderByRaw("FIELD(status, 'ongoing', 'upcoming', 'scheduled', 'completed')")
+            ->orderByRaw("CASE 
+                WHEN status = 'ongoing' THEN 1 
+                WHEN status = 'upcoming' THEN 2 
+                WHEN status = 'scheduled' THEN 3 
+                WHEN status = 'completed' THEN 4 
+                ELSE 5 END")
             ->paginate(12);
 
         return view('general.tournaments', compact('tournaments'));
