@@ -27,20 +27,22 @@ try {
         }
     }
 
-    // Set view cache path specifically
-    config(['view.compiled' => '/tmp/storage/framework/views']);
-
-    // Handle the request...
+    // Handle the request... (This will boot the app and providers)
     $app->handleRequest(Request::capture());
 
 } catch (Throwable $e) {
     // Output error to stderr for Vercel logs and display on screen
     error_log('Boot Error: ' . $e->getMessage());
     
-    header('HTTP/1.1 500 Internal Server Error');
-    echo "<h1>Boot Error (Vercel)</h1>";
+    if (!headers_sent()) {
+        header('HTTP/1.1 500 Internal Server Error');
+    }
+    
+    echo "<html><body style='font-family: sans-serif; padding: 2rem;'>";
+    echo "<h1 style='color: #e53e3e;'>Boot Error (Vercel)</h1>";
     echo "<p><strong>Message:</strong> " . htmlspecialchars($e->getMessage()) . "</p>";
     echo "<p><strong>File:</strong> " . $e->getFile() . " on line " . $e->getLine() . "</p>";
     echo "<h3>Stack Trace:</h3>";
-    echo "<pre>" . htmlspecialchars($e->getTraceAsString()) . "</pre>";
+    echo "<pre style='background: #f7fafc; padding: 1rem; overflow: auto;'>" . htmlspecialchars($e->getTraceAsString()) . "</pre>";
+    echo "</body></html>";
 }
